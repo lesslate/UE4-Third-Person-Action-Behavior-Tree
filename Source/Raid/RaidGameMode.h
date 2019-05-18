@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "Raid.h"
 #include "GameFramework/GameModeBase.h"
 #include "RaidGameMode.generated.h"
 

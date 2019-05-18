@@ -11,7 +11,7 @@ URaidPlayerAnimInstance::URaidPlayerAnimInstance()
 	CurrentPawnSpeed = 0.0f;
 	IsInAir = false;
 
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> Attack_Montage(TEXT("AnimMontage'/Game/TwinbladesAnimsetBase/InPlace/AttackMontage_2.AttackMontage_2'"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> Attack_Montage(TEXT("AnimMontage'/Game/TwinbladesAnimsetBase/InPlace/AttackMontage.AttackMontage'"));
 	if (Attack_Montage.Succeeded())
 	{
 		AttackMontage = Attack_Montage.Object;
@@ -31,5 +31,27 @@ void URaidPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 void URaidPlayerAnimInstance::PlayAttackMontage()
 {
-		Montage_Play(AttackMontage, 1.0f);
+	Montage_Play(AttackMontage, 1.0f);
+}
+
+void URaidPlayerAnimInstance::JumpToAttackMontageSection(int32 NewSection)
+{
+	CHECK(Montage_IsPlaying(AttackMontage));
+	Montage_JumpToSection(GetAttackMontageSectionName(NewSection), AttackMontage);
+}
+
+void URaidPlayerAnimInstance::AnimNotify_AttackHitCheck()
+{
+	OnAttackHitCheck.Broadcast();
+}
+
+void URaidPlayerAnimInstance::AnimNotify_NextAttackCheck()
+{
+	OnNextAttackCheck.Broadcast();
+}
+
+FName URaidPlayerAnimInstance::GetAttackMontageSectionName(int32 Section)
+{
+	CHECK(FMath::IsWithinInclusive<int32>(Section, 1, 4), NAME_None);
+	return FName(*FString::Printf(TEXT("Attack%d"), Section));
 }

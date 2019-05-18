@@ -66,6 +66,9 @@ ARaidPlayer::ARaidPlayer()
 	SprintSpeedMultiplier = 2.0f;
 
 	IsAttacking = false;
+
+	MaxCombo = 4;
+	
 }
 
 // Called when the game starts or when spawned
@@ -79,10 +82,23 @@ void ARaidPlayer::PostInitializeComponents()
 {	
 	Super::PostInitializeComponents();
 	PlayerAnim = Cast<URaidPlayerAnimInstance>(GetMesh()->GetAnimInstance());
-	check(PlayerAnim);
+	
+	if (nullptr != PlayerAnim)
+	{
+		PlayerAnim->OnMontageEnded.AddDynamic(this, &ARaidPlayer::OnAttackMontageEnded);
 
-	PlayerAnim->OnMontageEnded.AddDynamic(this, &ARaidPlayer::OnAttackMontageEnded);
+		PlayerAnim->OnNextAttackCheck.AddLambda([this]()->void {
+			CanNextCombo = false;
+
+			if (IsComboInputOn)
+			{
+				AttackStartComboState();
+				PlayerAnim->JumpToAttackMontageSection(CurrentCombo);
+			}
+		});
+	}
 }
+
 // Called every frame
 void ARaidPlayer::Tick(float DeltaTime)
 {
@@ -170,15 +186,46 @@ void ARaidPlayer::StopSprintMulticast_Implementation()
 
 void ARaidPlayer::Attack()
 {
-	if (IsAttacking) return;
 
-	PlayerAnim->PlayAttackMontage();
+	if (IsAttacking)
+	{
+		CHECK(FMath::IsWithinInclusive<int32>(CurrentCombo, 1, MaxCombo));
+		if (CanNextCombo)
+		{
+			IsComboInputOn = true;
+		}
+	}
+	else
+	{
+		CHECK(CurrentCombo == 0);
+		AttackStartComboState();
+		PlayerAnim->PlayAttackMontage();
+		PlayerAnim->JumpToAttackMontageSection(CurrentCombo);
+		IsAttacking = true;
+	}
 
-	IsAttacking = true;
+}
+
+void ARaidPlayer::AttackStartComboState()
+{
+	CanNextCombo = true;
+	IsComboInputOn = false;
+	CHECK(FMath::IsWithinInclusive<int32>(CurrentCombo, 0, MaxCombo - 1));
+	CurrentCombo = FMath::Clamp<int32>(CurrentCombo + 1, 1, MaxCombo);
+}
+
+void ARaidPlayer::AttackEndComboState()
+{
+	IsComboInputOn = false;
+	CanNextCombo = false;
+	CurrentCombo = 0;
 }
 
 void ARaidPlayer::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	check(IsAttacking);
+	CHECK(IsAttacking);
+	CHECK(CurrentCombo > 0);
 	IsAttacking = false;
+	AttackEndComboState();
+
 }
