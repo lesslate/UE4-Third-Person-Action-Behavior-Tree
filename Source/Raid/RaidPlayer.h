@@ -36,8 +36,29 @@ public:
 	void StopSprintMulticast();
 	void StopSprintMulticast_Implementation();
 
+	/////////////////////////////////////////
 
-	void Attack();
+	UFUNCTION(Reliable, Server, WithValidation)
+	void AttackServer();
+	void AttackServer_Implementation();
+	bool AttackServer_Validate();
+
+	UFUNCTION(Reliable, NetMulticast)
+	void AttackMulticast();
+	void AttackMulticast_Implementation();
+
+	////////////////////////////////////////
+
+	UFUNCTION(Reliable, Server, WithValidation)
+	void ComboServer();
+	void ComboServer_Implementation();
+	bool ComboServer_Validate();
+
+	UFUNCTION(Reliable, NetMulticast)
+	void ComboMulticast();
+	void ComboMulticast_Implementation();
+
+	/////////////////////////////////////////
 
 	void AttackStartComboState();
 	void AttackEndComboState();

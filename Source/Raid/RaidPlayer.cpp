@@ -86,17 +86,10 @@ void ARaidPlayer::PostInitializeComponents()
 	if (nullptr != PlayerAnim)
 	{
 		PlayerAnim->OnMontageEnded.AddDynamic(this, &ARaidPlayer::OnAttackMontageEnded);
-
-		PlayerAnim->OnNextAttackCheck.AddLambda([this]()->void {
-			CanNextCombo = false;
-
-			if (IsComboInputOn)
-			{
-				AttackStartComboState();
-				PlayerAnim->JumpToAttackMontageSection(CurrentCombo);
-			}
-		});
+		PlayerAnim->OnNextAttackCheck.AddUObject(this, &ARaidPlayer::ComboServer);
 	}
+	
+
 }
 
 // Called every frame
@@ -123,7 +116,7 @@ void ARaidPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &ARaidPlayer::StartSprintServer);
 	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &ARaidPlayer::StopSprintServer);
 
-	PlayerInputComponent->BindAction("Attack", IE_Released, this, &ARaidPlayer::Attack);
+	PlayerInputComponent->BindAction("Attack", IE_Released, this, &ARaidPlayer::AttackServer);
 
 }
 
@@ -151,6 +144,7 @@ void ARaidPlayer::MoveRight(float Value)
 	}
 }
 
+////////////////Sprint///////////////////////////////////
 
 void ARaidPlayer::StartSprintServer_Implementation()
 {
@@ -181,13 +175,23 @@ void ARaidPlayer::StopSprintMulticast_Implementation()
 {
 	GetCharacterMovement()->MaxWalkSpeed = 300.0f;
 }
+//////////////////////////////////////////////////////////////
 
+//////////// Attack //////////////////////////////////////////
 
-
-void ARaidPlayer::Attack()
+void ARaidPlayer::AttackServer_Implementation()
 {
+	AttackMulticast();
+}
 
-	if (IsAttacking)
+bool ARaidPlayer::AttackServer_Validate()
+{
+	return true;
+}
+
+void ARaidPlayer::AttackMulticast_Implementation()
+{
+	if (IsAttacking) // OnNextAttackCheck 전에 공격시 IsComboInputOn = true 로 다음 공격섹션으로 이어짐
 	{
 		CHECK(FMath::IsWithinInclusive<int32>(CurrentCombo, 1, MaxCombo));
 		if (CanNextCombo)
@@ -195,7 +199,7 @@ void ARaidPlayer::Attack()
 			IsComboInputOn = true;
 		}
 	}
-	else
+	else // 첫번째 콤보 발생
 	{
 		CHECK(CurrentCombo == 0);
 		AttackStartComboState();
@@ -203,8 +207,35 @@ void ARaidPlayer::Attack()
 		PlayerAnim->JumpToAttackMontageSection(CurrentCombo);
 		IsAttacking = true;
 	}
+}
+
+///////////////////////////////////////////////////////////////
+
+/////////////Combo///////////////////////////////////////////
+
+void ARaidPlayer::ComboServer_Implementation()
+{
+	ComboMulticast();
+}
+
+bool ARaidPlayer::ComboServer_Validate()
+{
+	return true;
+}
+
+void ARaidPlayer::ComboMulticast_Implementation()
+{
+	CanNextCombo = false;
+
+	if (IsComboInputOn)
+	{
+		AttackStartComboState();
+		PlayerAnim->JumpToAttackMontageSection(CurrentCombo);
+	}
 
 }
+
+/////////////////////////////////////////////////////////////////
 
 void ARaidPlayer::AttackStartComboState()
 {
@@ -214,7 +245,7 @@ void ARaidPlayer::AttackStartComboState()
 	CurrentCombo = FMath::Clamp<int32>(CurrentCombo + 1, 1, MaxCombo);
 }
 
-void ARaidPlayer::AttackEndComboState()
+void ARaidPlayer::AttackEndComboState() // 공격 몽타주 종료시 콤보상태 초기화
 {
 	IsComboInputOn = false;
 	CanNextCombo = false;
