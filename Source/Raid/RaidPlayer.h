@@ -10,13 +10,15 @@ UCLASS()
 class RAID_API ARaidPlayer : public ACharacter
 {
 	GENERATED_BODY()
-
+	
 public:
 	// Sets default values for this character's properties
 	ARaidPlayer();
 
 	void MoveForward(float Value);
 	void MoveRight(float Value);
+
+	//////////     Sprint   //////////////////////
 
 	UFUNCTION(Reliable, Server, WithValidation)
 	void StartSprintServer();
@@ -36,7 +38,7 @@ public:
 	void StopSprintMulticast();
 	void StopSprintMulticast_Implementation();
 
-	/////////////////////////////////////////
+	////////////   Attack    //////////////////////
 
 	UFUNCTION(Reliable, Server, WithValidation)
 	void AttackServer();
@@ -47,7 +49,18 @@ public:
 	void AttackMulticast();
 	void AttackMulticast_Implementation();
 
-	////////////////////////////////////////
+	////////////   Attack2  //////////////////////
+
+	UFUNCTION(Reliable, Server, WithValidation)
+	void AttackServer2();
+	void AttackServer2_Implementation();
+	bool AttackServer2_Validate();
+
+	UFUNCTION(Reliable, NetMulticast)
+	void AttackMulticast2();
+	void AttackMulticast2_Implementation();
+	
+	///////////    Combo  ///////////////////////////
 
 	UFUNCTION(Reliable, Server, WithValidation)
 	void ComboServer();
@@ -58,10 +71,19 @@ public:
 	void ComboMulticast();
 	void ComboMulticast_Implementation();
 
-	/////////////////////////////////////////
+	///////// ServerApplyDamage  //////////////////
 
+	UFUNCTION(Reliable, Server, WithValidation)
+	void ServerApplyDamage(AActor* DamagedActor, float Damamge, AActor* DamageCauser);
+	void ServerApplyDamage_Implementation(AActor* DamagedActor, float Damamge, AActor* DamageCauser);
+	bool ServerApplyDamage_Validate(AActor* DamagedActor, float Damamge, AActor* DamageCauser);
+
+	/////////////////////////////////////////////////
 	void AttackStartComboState();
 	void AttackEndComboState();
+
+	void OnCollStart();
+	void OnCollEnd();
 
 	UFUNCTION()
 	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
@@ -86,14 +108,21 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Mesh)
 	class UStaticMeshComponent* BladeRight;
 
+	// Ä¸½¶ ÄÃ¸®Àü
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Mesh)
+	class UCapsuleComponent* AttackCheck;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character Movement: Walking")
 	float SprintSpeedMultiplier;
+
+	UPROPERTY(VisibleAnywhere,BlueprintReadOnly, Category="Character Stat")
+	float Damage;
 
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	virtual void PostInitializeComponents() override;
-
+	
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
@@ -101,10 +130,10 @@ private:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
 	bool IsAttacking;
 	
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
+	UPROPERTY(Replicated,VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
 	bool CanNextCombo;
 
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
+	UPROPERTY(Replicated,VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
 	bool IsComboInputOn;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
@@ -115,5 +144,16 @@ private:
 
 	UPROPERTY()
 	class URaidPlayerAnimInstance* PlayerAnim;
+
+	UPROPERTY()
+	bool IsInAir;
+
+	UPROPERTY()
+	bool IsRun;
+
+	UFUNCTION()
+	void AttackCheckOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+
 
 };

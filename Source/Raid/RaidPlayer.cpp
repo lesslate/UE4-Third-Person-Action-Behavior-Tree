@@ -10,12 +10,19 @@
 #include "GameFramework/Controller.h"
 #include "Components/StaticMeshComponent.h"
 #include "RaidPlayerAnimInstance.h"
+#include "Net/UnrealNetwork.h"
+#include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 
 // Sets default values
 ARaidPlayer::ARaidPlayer()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	
+	bReplicates = true;
+
+	Damage = 5000;
 
 	GetCharacterMovement()->JumpZVelocity = 350.0f;
 	GetCharacterMovement()->AirControl = 0.2f;
@@ -55,12 +62,16 @@ ARaidPlayer::ARaidPlayer()
 		GetMesh()->SetSkeletalMesh(PlayerMesh.Object);
 	}
 
-	//무기 소켓 생성
+	// 무기 소켓 생성
 	BladeLeft = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BladeLeft"));
 	BladeLeft->SetupAttachment(GetMesh(), TEXT("BladeLeft"));
 
 	BladeRight = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BladeRight"));
 	BladeRight->SetupAttachment(GetMesh(), TEXT("BladeRight"));
+
+	// 캡슐 컬리전 생성
+	AttackCheck = CreateDefaultSubobject<UCapsuleComponent>(TEXT("AttackCheck"));
+	AttackCheck->SetupAttachment(GetMesh(), TEXT("BladeLeft"));
 
 	// 달리기 속도 배수
 	SprintSpeedMultiplier = 2.0f;
@@ -76,6 +87,7 @@ void ARaidPlayer::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	
 }
 
 void ARaidPlayer::PostInitializeComponents()
@@ -88,7 +100,7 @@ void ARaidPlayer::PostInitializeComponents()
 		PlayerAnim->OnMontageEnded.AddDynamic(this, &ARaidPlayer::OnAttackMontageEnded);
 		PlayerAnim->OnNextAttackCheck.AddUObject(this, &ARaidPlayer::ComboServer);
 	}
-	
+	AttackCheck->OnComponentBeginOverlap.AddDynamic(this, &ARaidPlayer::AttackCheckOverlap);
 
 }
 
@@ -117,8 +129,20 @@ void ARaidPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &ARaidPlayer::StopSprintServer);
 
 	PlayerInputComponent->BindAction("Attack", IE_Released, this, &ARaidPlayer::AttackServer);
+	PlayerInputComponent->BindAction("Attack2", IE_Released, this, &ARaidPlayer::AttackServer2);
 
 }
+
+void ARaidPlayer::AttackCheckOverlap(UPrimitiveComponent* OverlappedComp, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
+{
+	
+	if (OtherActor != this)
+	{
+		ServerApplyDamage(OtherActor, Damage, this);
+	}
+}
+
+
 
 void ARaidPlayer::MoveForward(float Value)
 {
@@ -159,6 +183,7 @@ bool ARaidPlayer::StartSprintServer_Validate()
 void ARaidPlayer::StartSprintMulticast_Implementation()
 {
 	GetCharacterMovement()->MaxWalkSpeed *= SprintSpeedMultiplier;
+	IsRun = true;
 }
 
 void ARaidPlayer::StopSprintServer_Implementation()
@@ -174,8 +199,8 @@ bool ARaidPlayer::StopSprintServer_Validate()
 void ARaidPlayer::StopSprintMulticast_Implementation()
 {
 	GetCharacterMovement()->MaxWalkSpeed = 300.0f;
+	IsRun = false;
 }
-//////////////////////////////////////////////////////////////
 
 //////////// Attack //////////////////////////////////////////
 
@@ -191,6 +216,9 @@ bool ARaidPlayer::AttackServer_Validate()
 
 void ARaidPlayer::AttackMulticast_Implementation()
 {
+	IsInAir = GetCharacterMovement()->IsFalling();
+	if (IsInAir) return;
+
 	if (IsAttacking) // OnNextAttackCheck 전에 공격시 IsComboInputOn = true 로 다음 공격섹션으로 이어짐
 	{
 		CHECK(FMath::IsWithinInclusive<int32>(CurrentCombo, 1, MaxCombo));
@@ -207,9 +235,40 @@ void ARaidPlayer::AttackMulticast_Implementation()
 		PlayerAnim->JumpToAttackMontageSection(CurrentCombo);
 		IsAttacking = true;
 	}
+
+}
+///////////Attack2/////////////////////////////////////////////
+
+void ARaidPlayer::AttackServer2_Implementation()
+{
+	AttackMulticast2();
 }
 
-///////////////////////////////////////////////////////////////
+bool ARaidPlayer::AttackServer2_Validate()
+{
+	return true;
+}
+
+void ARaidPlayer::AttackMulticast2_Implementation()
+{
+	IsInAir = GetCharacterMovement()->IsFalling();
+	if (IsInAir) return;
+
+	if (!IsAttacking)
+	{
+		if (IsRun)
+		{
+			Damage = 8000;
+			PlayerAnim->PlayDashAttack();
+		}
+		else
+		{
+			PlayerAnim->PlayAttackMontage2();
+		}
+	}
+	IsAttacking = true;
+}
+
 
 /////////////Combo///////////////////////////////////////////
 
@@ -235,7 +294,20 @@ void ARaidPlayer::ComboMulticast_Implementation()
 
 }
 
-/////////////////////////////////////////////////////////////////
+////////////////////ServerApplyDamage////////////////////////////
+
+void ARaidPlayer::ServerApplyDamage_Implementation(AActor* DamagedActor ,float Damamge,AActor* DamageCauser)
+{
+	UGameplayStatics::ApplyDamage(DamagedActor, Damage, nullptr, DamageCauser, nullptr);
+}
+
+bool ARaidPlayer::ServerApplyDamage_Validate(AActor* DamagedActor, float Damamge, AActor* DamageCauser)
+{
+	return true;
+}
+
+
+///////////////////////////////////////////////////////////////
 
 void ARaidPlayer::AttackStartComboState()
 {
@@ -245,6 +317,8 @@ void ARaidPlayer::AttackStartComboState()
 	CurrentCombo = FMath::Clamp<int32>(CurrentCombo + 1, 1, MaxCombo);
 }
 
+
+
 void ARaidPlayer::AttackEndComboState() // 공격 몽타주 종료시 콤보상태 초기화
 {
 	IsComboInputOn = false;
@@ -252,11 +326,37 @@ void ARaidPlayer::AttackEndComboState() // 공격 몽타주 종료시 콤보상태 초기화
 	CurrentCombo = 0;
 }
 
+void ARaidPlayer::OnCollStart() // 노티파이 발생시 공격 컬리전 체크
+{
+	AttackCheck->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+}
+
+void ARaidPlayer::OnCollEnd()
+{
+	AttackCheck->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
 void ARaidPlayer::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
 	CHECK(IsAttacking);
-	CHECK(CurrentCombo > 0);
+	//CHECK(CurrentCombo > 0);
 	IsAttacking = false;
 	AttackEndComboState();
+	AttackCheck->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	Damage = 5000;
+}
 
+//Property Replicate
+
+void ARaidPlayer::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ARaidPlayer, CanNextCombo);
+	DOREPLIFETIME(ARaidPlayer, IsComboInputOn);
+	//DOREPLIFETIME(ARaidPlayer, CurrentCombo);
+	//DOREPLIFETIME(ARaidPlayer, MaxCombo);
+	//DOREPLIFETIME(ARaidPlayer, IsAttacking);
+	
+	
 }
