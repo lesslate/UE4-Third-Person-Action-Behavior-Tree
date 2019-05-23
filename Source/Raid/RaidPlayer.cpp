@@ -99,6 +99,7 @@ void ARaidPlayer::PostInitializeComponents()
 	{
 		PlayerAnim->OnMontageEnded.AddDynamic(this, &ARaidPlayer::OnAttackMontageEnded);
 		PlayerAnim->OnNextAttackCheck.AddUObject(this, &ARaidPlayer::ComboServer);
+		PlayerAnim->DodgeEnd.AddUObject(this, &ARaidPlayer::DodgeEndState);
 	}
 	AttackCheck->OnComponentBeginOverlap.AddDynamic(this, &ARaidPlayer::AttackCheckOverlap);
 
@@ -130,6 +131,8 @@ void ARaidPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 	PlayerInputComponent->BindAction("Attack", IE_Released, this, &ARaidPlayer::AttackServer);
 	PlayerInputComponent->BindAction("Attack2", IE_Released, this, &ARaidPlayer::AttackServer2);
+
+	PlayerInputComponent->BindAction("Dodge", IE_Released, this, &ARaidPlayer::DodgeServer);
 
 }
 
@@ -218,13 +221,13 @@ void ARaidPlayer::AttackMulticast_Implementation()
 {
 	IsInAir = GetCharacterMovement()->IsFalling();
 	if (IsInAir) return;
-
-	if (IsAttacking) // OnNextAttackCheck 전에 공격시 IsComboInputOn = true 로 다음 공격섹션으로 이어짐
+	
+	if (IsAttacking&&IsDodge) // OnNextAttackCheck 전에 공격시 IsComboInputOn = true 로 다음 공격섹션으로 이어짐
 	{
-		CHECK(FMath::IsWithinInclusive<int32>(CurrentCombo, 1, MaxCombo));
+		//CHECK(FMath::IsWithinInclusive<int32>(CurrentCombo, 1, MaxCombo));
 		if (CanNextCombo)
 		{
-			IsComboInputOn = true;
+				IsComboInputOn = true;
 		}
 	}
 	else // 첫번째 콤보 발생
@@ -234,7 +237,9 @@ void ARaidPlayer::AttackMulticast_Implementation()
 		PlayerAnim->PlayAttackMontage();
 		PlayerAnim->JumpToAttackMontageSection(CurrentCombo);
 		IsAttacking = true;
+		IsDodge = true;
 	}
+	
 
 }
 ///////////Attack2/////////////////////////////////////////////
@@ -254,7 +259,7 @@ void ARaidPlayer::AttackMulticast2_Implementation()
 	IsInAir = GetCharacterMovement()->IsFalling();
 	if (IsInAir) return;
 
-	if (!IsAttacking)
+	if (!IsAttacking&&!IsDodge)
 	{
 		if (IsRun)
 		{
@@ -267,6 +272,7 @@ void ARaidPlayer::AttackMulticast2_Implementation()
 		}
 	}
 	IsAttacking = true;
+	IsDodge = true;
 }
 
 
@@ -306,6 +312,29 @@ bool ARaidPlayer::ServerApplyDamage_Validate(AActor* DamagedActor, float Damamge
 	return true;
 }
 
+///////////////Dodge////////////////////////////////////////////
+
+void ARaidPlayer::DodgeServer_Implementation()
+{
+	DodgeMulticast();
+}
+
+bool ARaidPlayer::DodgeServer_Validate()
+{
+	return true;
+}
+
+void ARaidPlayer::DodgeMulticast_Implementation()
+{
+	IsInAir = GetCharacterMovement()->IsFalling();
+	if (IsInAir) return;
+
+	if(!IsDodge&&!IsAttacking)
+	PlayerAnim->PlayDodge();
+	IsDodge = true;
+	IsAttacking = true;
+}
+
 
 ///////////////////////////////////////////////////////////////
 
@@ -336,11 +365,19 @@ void ARaidPlayer::OnCollEnd()
 	AttackCheck->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
+void ARaidPlayer::DodgeEndState()
+{
+	IsDodge = false;
+	IsAttacking = false;
+}
+
 void ARaidPlayer::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
 	CHECK(IsAttacking);
 	//CHECK(CurrentCombo > 0);
 	IsAttacking = false;
+	IsDodge = false;
+
 	AttackEndComboState();
 	AttackCheck->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	Damage = 5000;
@@ -352,11 +389,9 @@ void ARaidPlayer::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLi
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ARaidPlayer, CanNextCombo);
-	DOREPLIFETIME(ARaidPlayer, IsComboInputOn);
-	//DOREPLIFETIME(ARaidPlayer, CurrentCombo);
-	//DOREPLIFETIME(ARaidPlayer, MaxCombo);
-	//DOREPLIFETIME(ARaidPlayer, IsAttacking);
+	//DOREPLIFETIME(ARaidPlayer, CanNextCombo);
+	//DOREPLIFETIME(ARaidPlayer, IsComboInputOn);
+	
 	
 	
 }

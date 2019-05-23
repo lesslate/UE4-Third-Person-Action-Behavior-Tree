@@ -28,6 +28,13 @@ URaidPlayerAnimInstance::URaidPlayerAnimInstance()
 	{
 		AttackMontage2 = Attack_Montage2.Object;
 	}
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> Dodge_Montage(TEXT("AnimMontage'/Game/TwinbladesAnimsetBase/RootMotion/Twinblades_Dodge_Montage.Twinblades_Dodge_Montage'"));
+	if (Dodge_Montage.Succeeded())
+	{
+		Dodge = Dodge_Montage.Object;
+	}
+
 }
 
 void URaidPlayerAnimInstance::NativeBeginPlay()
@@ -61,6 +68,11 @@ void URaidPlayerAnimInstance::PlayDashAttack()
 	Montage_Play(DashAttack, 1.0f);
 }
 
+void URaidPlayerAnimInstance::PlayDodge()
+{
+	Montage_Play(Dodge, 1.0f);
+}
+
 void URaidPlayerAnimInstance::JumpToAttackMontageSection(int32 NewSection)
 {
 	CHECK(Montage_IsPlaying(AttackMontage));
@@ -85,6 +97,11 @@ void URaidPlayerAnimInstance::AnimNotify_OnCollision()
 void URaidPlayerAnimInstance::AnimNotify_OnCollisionEnd()
 {
 	Player->OnCollEnd();
+}
+
+void URaidPlayerAnimInstance::AnimNotify_DodgeEnd()
+{
+	DodgeEnd.Broadcast();
 }
 
 FName URaidPlayerAnimInstance::GetAttackMontageSectionName(int32 Section)

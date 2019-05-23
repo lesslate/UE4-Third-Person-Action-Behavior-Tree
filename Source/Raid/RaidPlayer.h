@@ -78,12 +78,25 @@ public:
 	void ServerApplyDamage_Implementation(AActor* DamagedActor, float Damamge, AActor* DamageCauser);
 	bool ServerApplyDamage_Validate(AActor* DamagedActor, float Damamge, AActor* DamageCauser);
 
+	///////// Dodge  //////////////////
+
+	UFUNCTION(Reliable, Server, WithValidation)
+	void DodgeServer();
+	void DodgeServer_Implementation();
+	bool DodgeServer_Validate();
+
+	UFUNCTION(Reliable, NetMulticast)
+	void DodgeMulticast();
+	void DodgeMulticast_Implementation();
+
 	/////////////////////////////////////////////////
 	void AttackStartComboState();
 	void AttackEndComboState();
 
 	void OnCollStart();
 	void OnCollEnd();
+
+	void DodgeEndState();
 
 	UFUNCTION()
 	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
@@ -150,6 +163,9 @@ private:
 
 	UPROPERTY()
 	bool IsRun;
+
+	UPROPERTY()
+	bool IsDodge;
 
 	UFUNCTION()
 	void AttackCheckOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);

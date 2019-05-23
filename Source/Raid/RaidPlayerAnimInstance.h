@@ -11,6 +11,7 @@
 
 DECLARE_MULTICAST_DELEGATE(FOnNextAttackCheckDelegate);
 DECLARE_MULTICAST_DELEGATE(FOnAttackHitCheckDelegate);
+DECLARE_MULTICAST_DELEGATE(FDodgeEnd);
 
 /**
  * 
@@ -28,11 +29,13 @@ public:
 	void PlayAttackMontage();
 	void PlayAttackMontage2();
 	void PlayDashAttack();
+	void PlayDodge();
 	void JumpToAttackMontageSection(int32 NewSection);
 
 public:
 	FOnNextAttackCheckDelegate OnNextAttackCheck;
 	FOnAttackHitCheckDelegate OnAttackHitCheck;
+	FDodgeEnd DodgeEnd;
 
 	UPROPERTY()
 	class ARaidPlayer* Player;
@@ -48,6 +51,9 @@ private:
 
 	UFUNCTION()
 	void AnimNotify_OnCollisionEnd();
+
+	UFUNCTION()
+	void AnimNotify_DodgeEnd();
 
 	FName GetAttackMontageSectionName(int32 Section);
 private:
@@ -66,4 +72,6 @@ private:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
 	UAnimMontage* DashAttack;
 
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
+	UAnimMontage* Dodge;
 };
