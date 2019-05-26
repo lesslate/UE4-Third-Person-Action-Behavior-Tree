@@ -17,7 +17,8 @@ public:
 
 	void MoveForward(float Value);
 	void MoveRight(float Value);
-
+	void Jump();
+	void StopJumping();
 	//////////     Sprint   //////////////////////
 
 	UFUNCTION(Reliable, Server, WithValidation)
@@ -120,6 +121,10 @@ protected:
 	// ¹«±â2
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Mesh)
 	class UStaticMeshComponent* BladeRight;
+
+	// hit »ç¿îµå
+	UPROPERTY(BlueprintReadOnly, Category = "Audio")
+	class USoundCue* HitSound;
 
 	// Ä¸½¶ ÄÃ¸®Àü
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Mesh)

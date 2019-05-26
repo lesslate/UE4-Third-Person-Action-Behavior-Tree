@@ -12,6 +12,8 @@
 #include "RaidPlayerAnimInstance.h"
 #include "Net/UnrealNetwork.h"
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
+#include "Runtime/Engine/Classes/Components/AudioComponent.h"
 
 // Sets default values
 ARaidPlayer::ARaidPlayer()
@@ -62,6 +64,13 @@ ARaidPlayer::ARaidPlayer()
 		GetMesh()->SetSkeletalMesh(PlayerMesh.Object);
 	}
 
+	// 사운드 큐 저장
+	static ConstructorHelpers::FObjectFinder<USoundCue>Hit_Sound(TEXT("SoundCue'/Game/Sound/hit_Cue.hit_Cue'"));
+	if (Hit_Sound.Succeeded())
+	{
+		HitSound = Hit_Sound.Object;
+	}
+
 	// 무기 소켓 생성
 	BladeLeft = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BladeLeft"));
 	BladeLeft->SetupAttachment(GetMesh(), TEXT("BladeLeft"));
@@ -79,7 +88,8 @@ ARaidPlayer::ARaidPlayer()
 	IsAttacking = false;
 
 	MaxCombo = 4;
-	
+
+
 }
 
 // Called when the game starts or when spawned
@@ -117,7 +127,7 @@ void ARaidPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ARaidPlayer::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ARaidPlayer::MoveForward);
@@ -136,12 +146,29 @@ void ARaidPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 }
 
+void ARaidPlayer::Jump()
+{
+	if (IsDodge || IsAttacking) return;
+	bPressedJump = true;
+	JumpKeyHoldTime = 0.0f;
+}
+
+void ARaidPlayer::StopJumping()
+{
+	bPressedJump = false;
+	ResetJumpState();
+}
+
+
 void ARaidPlayer::AttackCheckOverlap(UPrimitiveComponent* OverlappedComp, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
-	
+	FVector OverlapLocation = OverlappedComp->GetComponentLocation();
+
 	if (OtherActor != this)
 	{
 		ServerApplyDamage(OtherActor, Damage, this);
+		UGameplayStatics::PlaySoundAtLocation(this, HitSound, OverlapLocation);
+		
 	}
 }
 
@@ -228,6 +255,7 @@ void ARaidPlayer::AttackMulticast_Implementation()
 		if (CanNextCombo)
 		{
 				IsComboInputOn = true;
+				LOG(Warning, TEXT("Input:%s"), IsComboInputOn ? TEXT("true") : TEXT("False"));
 		}
 	}
 	else // 첫번째 콤보 발생
@@ -305,6 +333,7 @@ void ARaidPlayer::ComboMulticast_Implementation()
 void ARaidPlayer::ServerApplyDamage_Implementation(AActor* DamagedActor ,float Damamge,AActor* DamageCauser)
 {
 	UGameplayStatics::ApplyDamage(DamagedActor, Damage, nullptr, DamageCauser, nullptr);
+	AttackCheck->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 bool ARaidPlayer::ServerApplyDamage_Validate(AActor* DamagedActor, float Damamge, AActor* DamageCauser)
@@ -344,6 +373,7 @@ void ARaidPlayer::AttackStartComboState()
 	IsComboInputOn = false;
 	CHECK(FMath::IsWithinInclusive<int32>(CurrentCombo, 0, MaxCombo - 1));
 	CurrentCombo = FMath::Clamp<int32>(CurrentCombo + 1, 1, MaxCombo);
+	
 }
 
 
@@ -373,6 +403,7 @@ void ARaidPlayer::DodgeEndState()
 
 void ARaidPlayer::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
+	
 	CHECK(IsAttacking);
 	//CHECK(CurrentCombo > 0);
 	IsAttacking = false;
