@@ -10,6 +10,8 @@
 #include "Components/WidgetComponent.h"
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 #include "Math/UnrealMathUtility.h"
+#include "GruxAIController.h"
+#include "GruxAnimInstance.h"
 
 // Sets default values
 AGrux::AGrux()
@@ -17,11 +19,16 @@ AGrux::AGrux()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	Damage = 30;
+
+	AIControllerClass = AGruxAIController::StaticClass();
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+
 	bUseControllerRotationYaw = false;
 	GetCharacterMovement()->bUseControllerDesiredRotation = false;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 480.0f, 0.0f);
-	GetCharacterMovement()->MaxWalkSpeed = 150.0f;
+	GetCharacterMovement()->MaxWalkSpeed = 300.0f;
 
 	// ½ºÄÌ·¹Å» ¸Þ½Ã ¼³Á¤
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> GRUXMESH(TEXT("SkeletalMesh'/Game/ParagonGrux/Characters/Heroes/Grux/Skins/Tier_2/Grux_Beetle_Molten/Meshes/GruxMolten.GruxMolten'"));
@@ -42,6 +49,14 @@ AGrux::AGrux()
 	AudioComponent->bAutoActivate = false;
 	AudioComponent->SetupAttachment(GetMesh());
 
+	// Ä¸½¶ ÄÃ¸®Àü »ý¼º
+	GruxAttackCheck = CreateDefaultSubobject<UCapsuleComponent>(TEXT("GruxAttackCheck1"));
+	GruxAttackCheck->SetupAttachment(GetMesh(), TEXT("FX_Trail_L_02"));
+	GruxAttackCheck2 = CreateDefaultSubobject<UCapsuleComponent>(TEXT("GruxAttackCheck2"));
+	GruxAttackCheck2->SetupAttachment(GetMesh(), TEXT("FX_Trail_R_02"));
+
+	GruxAttackCheck->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GruxAttackCheck2->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 // Called when the game starts or when spawned
@@ -51,9 +66,17 @@ void AGrux::BeginPlay()
 	
 }
 
-void AGrux::OnAttackMontageEnded(UAnimMontage * Montage, bool bInterrupted)
-{
 
+void AGrux::ServerApplyDamage_Implementation(AActor * DamagedActor, float Damamge, AActor * DamageCauser)
+{
+	UGameplayStatics::ApplyDamage(DamagedActor, Damage, nullptr, DamageCauser, nullptr);
+	GruxAttackCheck->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GruxAttackCheck2->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+bool AGrux::ServerApplyDamage_Validate(AActor * DamagedActor, float Damamge, AActor * DamageCauser)
+{
+	return true;
 }
 
 // Called every frame
@@ -66,6 +89,13 @@ void AGrux::Tick(float DeltaTime)
 void AGrux::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
+	GruxAnim = Cast<UGruxAnimInstance>(GetMesh()->GetAnimInstance());
+	if (nullptr != GruxAnim)
+	{
+		GruxAnim->OnMontageEnded.AddDynamic(this, &AGrux::OnAttackMontageEnded);
+	}
+	GruxAttackCheck->OnComponentBeginOverlap.AddDynamic(this, &AGrux::AttackCheckOverlap);
+	GruxAttackCheck2->OnComponentBeginOverlap.AddDynamic(this, &AGrux::AttackCheckOverlap);
 }
 
 // Called to bind functionality to input
@@ -75,3 +105,59 @@ void AGrux::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 }
 
+void AGrux::AttackCheckOverlap(UPrimitiveComponent* OverlappedComp, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
+{
+	FVector OverlapLocation = OverlappedComp->GetComponentLocation();
+
+	if (OtherActor != this)
+	{
+		ServerApplyDamage(OtherActor, Damage, this);
+	}
+}
+
+void AGrux::Attack()
+{
+	if (!IsAttacking)
+	{
+		GruxAnim->PlayAttackMontage();
+		IsAttacking = true;
+		
+	}
+}
+
+void AGrux::DashAttack()
+{
+	if (!IsAttacking)
+	{
+		GruxAnim->PlayAttackMontage2();
+		IsAttacking = true;
+	}
+}
+
+void AGrux::TurnLeft()
+{
+	if (!IsAttacking)
+	{
+		GruxAnim->PlayTurnLeft();
+		IsAttacking = true;
+	}
+}
+
+void AGrux::TurnRight()
+{
+	if (!IsAttacking)
+	{
+		GruxAnim->PlayTurnRight();
+		IsAttacking = true;
+	}
+}
+
+void AGrux::OnAttackMontageEnded(UAnimMontage * Montage, bool bInterrupted)
+{
+	if (IsAttacking)
+	{
+		LOG(Warning, TEXT("AttackEnd"));
+		IsAttacking = false;
+		OnAttackEnd.Broadcast();
+	}
+}

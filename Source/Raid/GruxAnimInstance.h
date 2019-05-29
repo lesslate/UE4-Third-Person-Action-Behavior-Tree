@@ -19,22 +19,25 @@ public:
 
 	void PlayAttackMontage();
 	void PlayAttackMontage2();
-	void PlayAttackMontage3();
-	void PlayDeathMontage();
+	void PlayTurnLeft();
+	void PlayTurnRight();
+
+	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
 private:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
-	UAnimMontage* AttackMontage;
+	UAnimMontage* RightAttack;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
-	UAnimMontage* AttackMontage2;
+	UAnimMontage* DashAttackMontage;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
-	UAnimMontage* AttackMontage3;
+	UAnimMontage* TurnLeft;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
-	UAnimMontage* DeathMontage;
+	UAnimMontage* TurnRight;
 
-	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Pawn, Meta = (AllowPrivateAccess = true))
+	float CurrentPawnSpeed;
 	
 };

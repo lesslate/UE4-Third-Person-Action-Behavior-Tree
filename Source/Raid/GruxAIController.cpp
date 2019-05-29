@@ -8,7 +8,9 @@
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 
 
-const FName AGruxAIController::TargetKey(TEXT("Target"));
+const FName AGruxAIController::Distance(TEXT("Distance"));
+const FName AGruxAIController::TargetKey(TEXT("TargetKey"));
+const FName AGruxAIController::Direction(TEXT("Direction"));
 
 AGruxAIController::AGruxAIController()
 {

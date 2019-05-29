@@ -25,7 +25,8 @@ public:
 	float Radius;
 	
 	static const FName TargetKey;
-
+	static const FName Distance;
+	static const FName Direction;
 private:
 	UPROPERTY()
 	class UBehaviorTree* BTGrux;

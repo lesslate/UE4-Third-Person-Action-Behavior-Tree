@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "Grux.generated.h"
 
+DECLARE_MULTICAST_DELEGATE(FOnAttackEndDelegate);
+
 UCLASS()
 class RAID_API AGrux : public ACharacter
 {
@@ -15,26 +17,47 @@ public:
 	// Sets default values for this character's properties
 	AGrux();
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
 	void Attack();
-	void Attack2();
+	void DashAttack();
+	void TurnLeft();
+	void TurnRight();
+
 	void Attack3();
 	void Run();
 	void Walk();
 	void Death();
 
+	FOnAttackEndDelegate OnAttackEnd;
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Audio")
 	class UAudioComponent* AudioComponent;
 
-	//UPROPERTY()
-	//class U* GruxAnim;
+	// ¹«±â Ä¸½¶ ÄÃ¸®Àü1
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Mesh)
+	class UCapsuleComponent* GruxAttackCheck;
+
+	// ¹«±â Ä¸½¶ ÄÃ¸®Àü2
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Mesh)
+	class UCapsuleComponent* GruxAttackCheck2;
+	
 
 	UFUNCTION()
 	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+
+	UFUNCTION()
+	void AttackCheckOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	///////// ServerApplyDamage  //////////////////
+
+	UFUNCTION(Reliable, Server, WithValidation)
+	void ServerApplyDamage(AActor* DamagedActor, float Damamge, AActor* DamageCauser);
+	void ServerApplyDamage_Implementation(AActor* DamagedActor, float Damamge, AActor* DamageCauser);
+	bool ServerApplyDamage_Validate(AActor* DamagedActor, float Damamge, AActor* DamageCauser);
 
 public:	
 	// Called every frame
@@ -49,13 +72,18 @@ private:
 	float HP;
 
 	UPROPERTY(VisibleAnywhere)
+	float Damage;
+
+	UPROPERTY(VisibleAnywhere)
 	bool IsDeath;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
 	bool IsAttacking;
 
+	UPROPERTY()
+	class UGruxAnimInstance* GruxAnim;
+
 	//UPROPERTY()
 	//class A* GruxAI;
-
 	
 };
