@@ -22,6 +22,7 @@ public:
 	void PlayTurnLeft();
 	void PlayTurnRight();
 	void PlayCast();
+	void PlayStartMontage();
 
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 

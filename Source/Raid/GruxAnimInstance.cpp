@@ -70,6 +70,10 @@ void UGruxAnimInstance::PlayCast()
 	Montage_Play(CastMontage, 1.0f);
 }
 
+void UGruxAnimInstance::PlayStartMontage()
+{
+	Montage_Play(StartMontage, 1.0f);
+}
 void UGruxAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
 	auto Pawn = TryGetPawnOwner();

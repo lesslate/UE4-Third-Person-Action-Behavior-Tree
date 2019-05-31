@@ -64,6 +64,12 @@ void AGrux::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	if (GruxAI!=nullptr)
+	{
+		GruxAI->StopAI();
+		GruxAnim->PlayStartMontage();
+		GetWorld()->GetTimerManager().SetTimer(timer, this, &AGrux::AIStart, 5.0f, false);
+	}
 }
 
 
@@ -90,7 +96,7 @@ void AGrux::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 	GruxAnim = Cast<UGruxAnimInstance>(GetMesh()->GetAnimInstance());
-	GruxAI = Cast<AGruxAIController>(AIControllerClass);
+	GruxAI = Cast<AGruxAIController>(GetController());
 	if (nullptr != GruxAnim)
 	{
 		GruxAnim->OnMontageEnded.AddDynamic(this, &AGrux::OnAttackMontageEnded);
@@ -160,6 +166,12 @@ void AGrux::CastMethor()
 		GruxAnim->PlayCast();
 		IsAttacking = true;
 	}
+}
+
+void AGrux::AIStart()
+{
+	if(GruxAI!=nullptr)
+	GruxAI->StartAI();
 }
 
 void AGrux::OnAttackMontageEnded(UAnimMontage * Montage, bool bInterrupted)

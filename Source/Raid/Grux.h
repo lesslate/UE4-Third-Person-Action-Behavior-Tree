@@ -26,6 +26,7 @@ public:
 	void Run();
 	void Walk();
 	void Death();
+	void AIStart();
 
 	FOnAttackEndDelegate OnAttackEnd;
 protected:
@@ -85,6 +86,12 @@ private:
 
 	UPROPERTY()
 	class AGruxAIController* GruxAI;
+
+	UPROPERTY()
+	FTimerHandle timer;
+
+
+
 	//UPROPERTY()
 	//class A* GruxAI;
 	
