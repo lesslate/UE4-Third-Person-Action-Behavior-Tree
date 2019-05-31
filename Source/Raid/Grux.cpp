@@ -90,6 +90,7 @@ void AGrux::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 	GruxAnim = Cast<UGruxAnimInstance>(GetMesh()->GetAnimInstance());
+	GruxAI = Cast<AGruxAIController>(AIControllerClass);
 	if (nullptr != GruxAnim)
 	{
 		GruxAnim->OnMontageEnded.AddDynamic(this, &AGrux::OnAttackMontageEnded);
@@ -148,6 +149,15 @@ void AGrux::TurnRight()
 	if (!IsAttacking)
 	{
 		GruxAnim->PlayTurnRight();
+		IsAttacking = true;
+	}
+}
+
+void AGrux::CastMethor()
+{
+	if (!IsAttacking)
+	{
+		GruxAnim->PlayCast();
 		IsAttacking = true;
 	}
 }

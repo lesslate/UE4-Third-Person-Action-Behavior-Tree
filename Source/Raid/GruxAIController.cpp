@@ -8,9 +8,11 @@
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 
 
+
 const FName AGruxAIController::Distance(TEXT("Distance"));
 const FName AGruxAIController::TargetKey(TEXT("TargetKey"));
 const FName AGruxAIController::Direction(TEXT("Direction"));
+const FName AGruxAIController::SelectNumber(TEXT("SelectNumber"));
 
 AGruxAIController::AGruxAIController()
 {
@@ -45,8 +47,17 @@ void AGruxAIController::StopAI()
 	if (nullptr != BehaviorTreeComponent)
 	{
 		BehaviorTreeComponent->StopTree(EBTStopMode::Safe);
+		
 	}
 }
 
+void AGruxAIController::StartAI()
+{
+	auto BehaviorTreeComponent = Cast<UBehaviorTreeComponent>(BrainComponent);
+	if (nullptr != BehaviorTreeComponent)
+	{
+		BehaviorTreeComponent->StartTree(*this->BTGrux, EBTExecutionMode::Looped);
+	}
+}
 
 

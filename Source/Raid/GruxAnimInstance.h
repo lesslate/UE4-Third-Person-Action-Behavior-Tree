@@ -21,6 +21,7 @@ public:
 	void PlayAttackMontage2();
 	void PlayTurnLeft();
 	void PlayTurnRight();
+	void PlayCast();
 
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
@@ -37,7 +38,15 @@ private:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
 	UAnimMontage* TurnRight;
 
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
+	UAnimMontage* CastMontage;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
+	UAnimMontage* StartMontage;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Pawn, Meta = (AllowPrivateAccess = true))
 	float CurrentPawnSpeed;
+	
+
 	
 };

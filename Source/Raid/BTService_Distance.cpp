@@ -25,10 +25,6 @@ void UBTService_Distance::TickNode(UBehaviorTreeComponent & OwnerComp, uint8 * N
 
 	bool bResult;
 
-	if (nullptr == ControllingPawn)
-		return;
-
-
 	auto Target = Cast<ARaidPlayer>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(AGruxAIController::TargetKey));
 	
 	if (nullptr == Target)

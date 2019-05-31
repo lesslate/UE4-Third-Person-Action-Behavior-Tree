@@ -20,6 +20,7 @@ public:
 	virtual void Possess(APawn* InPawn) override;
 
 	void StopAI();
+	void StartAI();
 
 	UPROPERTY()
 	float Radius;
@@ -27,6 +28,7 @@ public:
 	static const FName TargetKey;
 	static const FName Distance;
 	static const FName Direction;
+	static const FName SelectNumber;
 private:
 	UPROPERTY()
 	class UBehaviorTree* BTGrux;
@@ -34,4 +36,5 @@ private:
 	UPROPERTY()
 	class UBlackboardData* BBGrux;
 	
+
 };

@@ -21,7 +21,7 @@ public:
 	void DashAttack();
 	void TurnLeft();
 	void TurnRight();
-
+	void CastMethor();
 	void Attack3();
 	void Run();
 	void Walk();
@@ -83,6 +83,8 @@ private:
 	UPROPERTY()
 	class UGruxAnimInstance* GruxAnim;
 
+	UPROPERTY()
+	class AGruxAIController* GruxAI;
 	//UPROPERTY()
 	//class A* GruxAI;
 	
