@@ -168,6 +168,24 @@ void AGrux::CastMethor()
 	}
 }
 
+void AGrux::FourStrike()
+{
+	if (!IsAttacking)
+	{
+		GruxAnim->PlayFourStrike();
+		IsAttacking = true;
+	}
+}
+
+void AGrux::DoublePain()
+{
+	if (!IsAttacking)
+	{
+		GruxAnim->PlayDoublePain();
+		IsAttacking = true;
+	}
+}
+
 void AGrux::AIStart()
 {
 	if(GruxAI!=nullptr)
@@ -178,7 +196,6 @@ void AGrux::OnAttackMontageEnded(UAnimMontage * Montage, bool bInterrupted)
 {
 	if (IsAttacking)
 	{
-		LOG(Warning, TEXT("AttackEnd"));
 		IsAttacking = false;
 		OnAttackEnd.Broadcast();
 	}

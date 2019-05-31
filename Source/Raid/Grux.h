@@ -22,7 +22,9 @@ public:
 	void TurnLeft();
 	void TurnRight();
 	void CastMethor();
-	void Attack3();
+	void FourStrike();
+	void DoublePain();
+
 	void Run();
 	void Walk();
 	void Death();

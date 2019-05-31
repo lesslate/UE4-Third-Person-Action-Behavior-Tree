@@ -36,10 +36,23 @@ UGruxAnimInstance::UGruxAnimInstance()
 	{
 		CastMontage = CAST.Object;
 	}
+
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> START(TEXT("AnimMontage'/Game/ParagonGrux/Characters/Heroes/Grux/Animations/StartMontage.StartMontage'"));
 	if (START.Succeeded())
 	{
 		StartMontage = START.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> FOURSTRIKE(TEXT("AnimMontage'/Game/ParagonGrux/Characters/Heroes/Grux/Animations/FourStrike.FourStrike'"));
+	if (FOURSTRIKE.Succeeded())
+	{
+		FourStrike = FOURSTRIKE.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> DOUBLE(TEXT("AnimMontage'/Game/ParagonGrux/Characters/Heroes/Grux/Animations/DoublePain_Montage.DoublePain_Montage'"));
+	if (DOUBLE.Succeeded())
+	{
+		DoublePain = DOUBLE.Object;
 	}
 	
 }
@@ -68,6 +81,16 @@ void UGruxAnimInstance::PlayTurnRight()
 void UGruxAnimInstance::PlayCast()
 {
 	Montage_Play(CastMontage, 1.0f);
+}
+
+void UGruxAnimInstance::PlayFourStrike()
+{
+	Montage_Play(FourStrike, 1.0f);
+}
+
+void UGruxAnimInstance::PlayDoublePain()
+{
+	Montage_Play(DoublePain, 1.0f);
 }
 
 void UGruxAnimInstance::PlayStartMontage()
