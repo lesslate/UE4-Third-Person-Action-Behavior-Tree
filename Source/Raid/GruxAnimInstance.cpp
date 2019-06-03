@@ -61,10 +61,16 @@ UGruxAnimInstance::UGruxAnimInstance()
 		BackJump = BACKJUMP.Object;
 	}
 	
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> TOUNT(TEXT("AnimMontage'/Game/ParagonGrux/Characters/Heroes/Grux/Animations/Jump.Jump'"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> TOUNT(TEXT("AnimMontage'/Game/ParagonGrux/Characters/Heroes/Grux/Animations/Tount.Tount'"));
 	if (TOUNT.Succeeded())
 	{
 		Tount = TOUNT.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> QUAKE(TEXT("AnimMontage'/Game/ParagonGrux/Characters/Heroes/Grux/Animations/SelectScreen_Emote_Montage.SelectScreen_Emote_Montage'"));
+	if (QUAKE.Succeeded())
+	{
+		Quake = QUAKE.Object;
 	}
 }
 
@@ -112,6 +118,11 @@ void UGruxAnimInstance::PlayBackJump()
 void UGruxAnimInstance::PlayTount()
 {
 	Montage_Play(Tount, 1.0f);
+}
+
+void UGruxAnimInstance::PlayQuake()
+{
+	Montage_Play(Quake, 1.0f);
 }
 
 void UGruxAnimInstance::PlayStartMontage()

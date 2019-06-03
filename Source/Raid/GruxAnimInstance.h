@@ -27,6 +27,7 @@ public:
 	void PlayDoublePain();
 	void PlayBackJump();
 	void PlayTount();
+	void PlayQuake();
 
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
@@ -60,6 +61,9 @@ private:
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
 	UAnimMontage* Tount;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
+	UAnimMontage* Quake;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Pawn, Meta = (AllowPrivateAccess = true))
 	float CurrentPawnSpeed;

@@ -26,9 +26,9 @@ public:
 	void DoublePain();
 	void BackJump();
 	void Tount();
+	void Quake();
 
-	void Run();
-	void Walk();
+
 	void Death();
 	void AIStart();
 

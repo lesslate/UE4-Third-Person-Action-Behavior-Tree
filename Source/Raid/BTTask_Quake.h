@@ -4,21 +4,21 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
-#include "BTTask_Tount.generated.h"
+#include "BTTask_Quake.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class RAID_API UBTTask_Tount : public UBTTaskNode
+class RAID_API UBTTask_Quake : public UBTTaskNode
 {
 	GENERATED_BODY()
 	
+
 public:
-	UBTTask_Tount();
-
-
+	UBTTask_Quake();
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
+
 
 protected:
 	virtual void TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSecondes) override;

@@ -14,7 +14,11 @@ class RAID_API UBTService_RandomNumber : public UBTService
 {
 	GENERATED_BODY()
 	
+public:
+	UBTService_RandomNumber();
 	
 	
-	
+protected:
+	virtual void OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
+
 };

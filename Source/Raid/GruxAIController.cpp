@@ -12,7 +12,7 @@
 const FName AGruxAIController::Distance(TEXT("Distance"));
 const FName AGruxAIController::TargetKey(TEXT("TargetKey"));
 const FName AGruxAIController::Direction(TEXT("Direction"));
-const FName AGruxAIController::SelectNumber(TEXT("SelectNumber"));
+const FName AGruxAIController::SelectAttackNumber(TEXT("SelectAttackNumber"));
 
 AGruxAIController::AGruxAIController()
 {

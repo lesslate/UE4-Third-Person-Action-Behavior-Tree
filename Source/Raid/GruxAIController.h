@@ -28,7 +28,8 @@ public:
 	static const FName TargetKey;
 	static const FName Distance;
 	static const FName Direction;
-	static const FName SelectNumber;
+	static const FName SelectAttackNumber;
+
 private:
 	UPROPERTY()
 	class UBehaviorTree* BTGrux;

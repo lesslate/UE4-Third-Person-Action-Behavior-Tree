@@ -204,6 +204,15 @@ void AGrux::Tount()
 	}
 }
 
+void AGrux::Quake()
+{
+	if (!IsAttacking)
+	{
+		GruxAnim->PlayQuake();
+		IsAttacking = true;
+	}
+}
+
 void AGrux::AIStart()
 {
 	if(GruxAI!=nullptr)
