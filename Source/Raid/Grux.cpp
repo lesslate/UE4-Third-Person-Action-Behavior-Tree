@@ -25,8 +25,9 @@ AGrux::AGrux()
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
 	bUseControllerRotationYaw = false;
-	GetCharacterMovement()->bUseControllerDesiredRotation = false;
-	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->bUseControllerDesiredRotation = true;
+	GetCharacterMovement()->bOrientRotationToMovement = false;
+
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 480.0f, 0.0f);
 	GetCharacterMovement()->MaxWalkSpeed = 300.0f;
 
@@ -68,10 +69,9 @@ void AGrux::BeginPlay()
 	{
 		GruxAI->StopAI();
 		GruxAnim->PlayStartMontage();
-		GetWorld()->GetTimerManager().SetTimer(timer, this, &AGrux::AIStart, 5.0f, false);
+		GetWorld()->GetTimerManager().SetTimer(timer, this, &AGrux::AIStart, 5.2f, false); // 시작 몽타주 재생후 패턴시작
 	}
 }
-
 
 void AGrux::ServerApplyDamage_Implementation(AActor * DamagedActor, float Damamge, AActor * DamageCauser)
 {
@@ -109,7 +109,7 @@ void AGrux::PostInitializeComponents()
 void AGrux::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
+	
 }
 
 void AGrux::AttackCheckOverlap(UPrimitiveComponent* OverlappedComp, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
@@ -182,6 +182,24 @@ void AGrux::DoublePain()
 	if (!IsAttacking)
 	{
 		GruxAnim->PlayDoublePain();
+		IsAttacking = true;
+	}
+}
+
+void AGrux::BackJump()
+{
+	if (!IsAttacking)
+	{
+		GruxAnim->PlayBackJump();
+		IsAttacking = true;
+	}
+}
+
+void AGrux::Tount()
+{
+	if (!IsAttacking)
+	{
+		GruxAnim->PlayTount();
 		IsAttacking = true;
 	}
 }

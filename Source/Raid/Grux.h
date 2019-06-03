@@ -24,6 +24,8 @@ public:
 	void CastMethor();
 	void FourStrike();
 	void DoublePain();
+	void BackJump();
+	void Tount();
 
 	void Run();
 	void Walk();

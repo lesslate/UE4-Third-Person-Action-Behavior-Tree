@@ -54,7 +54,18 @@ UGruxAnimInstance::UGruxAnimInstance()
 	{
 		DoublePain = DOUBLE.Object;
 	}
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> BACKJUMP(TEXT("AnimMontage'/Game/ParagonGrux/Characters/Heroes/Grux/Animations/Jump.Jump'"));
+	if (BACKJUMP.Succeeded())
+	{
+		BackJump = BACKJUMP.Object;
+	}
 	
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> TOUNT(TEXT("AnimMontage'/Game/ParagonGrux/Characters/Heroes/Grux/Animations/Jump.Jump'"));
+	if (TOUNT.Succeeded())
+	{
+		Tount = TOUNT.Object;
+	}
 }
 
 
@@ -91,6 +102,16 @@ void UGruxAnimInstance::PlayFourStrike()
 void UGruxAnimInstance::PlayDoublePain()
 {
 	Montage_Play(DoublePain, 1.0f);
+}
+
+void UGruxAnimInstance::PlayBackJump()
+{
+	Montage_Play(BackJump, 1.0f);
+}
+
+void UGruxAnimInstance::PlayTount()
+{
+	Montage_Play(Tount, 1.0f);
 }
 
 void UGruxAnimInstance::PlayStartMontage()

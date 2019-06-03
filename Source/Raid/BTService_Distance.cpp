@@ -30,7 +30,7 @@ void UBTService_Distance::TickNode(UBehaviorTreeComponent & OwnerComp, uint8 * N
 	if (nullptr == Target)
 		return;
 
-	bResult = (Target->GetDistanceTo(ControllingPawn) >= 1000.0f);
+	bResult = (Target->GetDistanceTo(ControllingPawn) >= 700.0f);
 	
 	OwnerComp.GetBlackboardComponent()->SetValueAsBool(AGruxAIController::Distance, bResult);
 }
