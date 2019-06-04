@@ -51,13 +51,13 @@ AGrux::AGrux()
 	AudioComponent->SetupAttachment(GetMesh());
 
 	// 캡슐 컬리전 생성
-	GruxAttackCheck = CreateDefaultSubobject<UCapsuleComponent>(TEXT("GruxAttackCheck1"));
-	GruxAttackCheck->SetupAttachment(GetMesh(), TEXT("FX_Trail_L_02"));
-	GruxAttackCheck2 = CreateDefaultSubobject<UCapsuleComponent>(TEXT("GruxAttackCheck2"));
-	GruxAttackCheck2->SetupAttachment(GetMesh(), TEXT("FX_Trail_R_02"));
+	GruxLeftCheck = CreateDefaultSubobject<UCapsuleComponent>(TEXT("GruxLeftCheck"));
+	GruxLeftCheck->SetupAttachment(GetMesh(), TEXT("FX_Trail_L_02"));
+	GruxRightCheck = CreateDefaultSubobject<UCapsuleComponent>(TEXT("GruxRightCheck"));
+	GruxRightCheck->SetupAttachment(GetMesh(), TEXT("FX_Trail_R_02"));
 
-	GruxAttackCheck->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	GruxAttackCheck2->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GruxLeftCheck->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GruxRightCheck->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 // Called when the game starts or when spawned
@@ -76,8 +76,8 @@ void AGrux::BeginPlay()
 void AGrux::ServerApplyDamage_Implementation(AActor * DamagedActor, float Damamge, AActor * DamageCauser)
 {
 	UGameplayStatics::ApplyDamage(DamagedActor, Damage, nullptr, DamageCauser, nullptr);
-	GruxAttackCheck->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	GruxAttackCheck2->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GruxLeftCheck->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GruxRightCheck->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 bool AGrux::ServerApplyDamage_Validate(AActor * DamagedActor, float Damamge, AActor * DamageCauser)
@@ -101,8 +101,8 @@ void AGrux::PostInitializeComponents()
 	{
 		GruxAnim->OnMontageEnded.AddDynamic(this, &AGrux::OnAttackMontageEnded);
 	}
-	GruxAttackCheck->OnComponentBeginOverlap.AddDynamic(this, &AGrux::AttackCheckOverlap);
-	GruxAttackCheck2->OnComponentBeginOverlap.AddDynamic(this, &AGrux::AttackCheckOverlap);
+	GruxLeftCheck->OnComponentBeginOverlap.AddDynamic(this, &AGrux::AttackCheckOverlap);
+	GruxRightCheck->OnComponentBeginOverlap.AddDynamic(this, &AGrux::AttackCheckOverlap);
 }
 
 // Called to bind functionality to input
@@ -217,6 +217,28 @@ void AGrux::AIStart()
 {
 	if(GruxAI!=nullptr)
 	GruxAI->StartAI();
+}
+
+void AGrux::OnLeftCollStart() // 노티파이 발생시 공격 컬리전 체크
+{
+	GruxLeftCheck->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	LOG(Warning, TEXT("Left!"));
+}
+
+void AGrux::OnLeftCollEnd()
+{
+	GruxLeftCheck->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+void AGrux::OnRightCollStart() 
+{
+	GruxRightCheck->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	LOG(Warning, TEXT("Right!!"));
+}
+
+void AGrux::OnRightCollEnd()
+{
+	GruxRightCheck->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void AGrux::OnAttackMontageEnded(UAnimMontage * Montage, bool bInterrupted)

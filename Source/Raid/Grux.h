@@ -32,6 +32,13 @@ public:
 	void Death();
 	void AIStart();
 
+
+	void OnLeftCollStart();
+	void OnLeftCollEnd();
+	void OnRightCollStart();
+	void OnRightCollEnd();
+
+
 	FOnAttackEndDelegate OnAttackEnd;
 protected:
 	// Called when the game starts or when spawned
@@ -44,11 +51,11 @@ protected:
 
 	// ¹«±â Ä¸½¶ ÄÃ¸®Àü1
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Mesh)
-	class UCapsuleComponent* GruxAttackCheck;
+	class UCapsuleComponent* GruxLeftCheck;
 
 	// ¹«±â Ä¸½¶ ÄÃ¸®Àü2
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Mesh)
-	class UCapsuleComponent* GruxAttackCheck2;
+	class UCapsuleComponent* GruxRightCheck;
 	
 
 	UFUNCTION()

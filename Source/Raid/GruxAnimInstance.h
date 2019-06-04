@@ -30,7 +30,10 @@ public:
 	void PlayQuake();
 
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
+	virtual void NativeBeginPlay() override;
 
+	UPROPERTY()
+	class AGrux* Grux;
 private:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
 	UAnimMontage* RightAttack;
@@ -68,6 +71,16 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Pawn, Meta = (AllowPrivateAccess = true))
 	float CurrentPawnSpeed;
 	
+	UFUNCTION()
+	void AnimNotify_OnLeftCollision();
 
+	UFUNCTION()
+	void AnimNotify_OnLeftCollisionEnd();
+
+	UFUNCTION()
+	void AnimNotify_OnRightCollision();
+
+	UFUNCTION()
+	void AnimNotify_OnRightCollisionEnd();
 	
 };

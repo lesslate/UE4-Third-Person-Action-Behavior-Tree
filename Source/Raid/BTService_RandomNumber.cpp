@@ -35,16 +35,13 @@ void UBTService_RandomNumber::OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp
 	{
 		OwnerComp.GetBlackboardComponent()->SetValueAsInt(AGruxAIController::SelectAttackNumber, 3);
 	}
-	else if (x <= 70)
+	else if (x <= 80)
 	{
 		OwnerComp.GetBlackboardComponent()->SetValueAsInt(AGruxAIController::SelectAttackNumber, 4);
 	}
-	else if (x <= 90)
+	else
 	{
 		OwnerComp.GetBlackboardComponent()->SetValueAsInt(AGruxAIController::SelectAttackNumber, 5);
 	}
-	else
-	{
-		OwnerComp.GetBlackboardComponent()->SetValueAsInt(AGruxAIController::SelectAttackNumber, 6);
-	}
+
 }

@@ -2,6 +2,7 @@
 
 #include "GruxAnimInstance.h"
 #include "ConstructorHelpers.h"
+#include "Grux.h"
 
 UGruxAnimInstance::UGruxAnimInstance()
 {
@@ -74,6 +75,10 @@ UGruxAnimInstance::UGruxAnimInstance()
 	}
 }
 
+void UGruxAnimInstance::NativeBeginPlay()
+{
+	Grux = Cast<AGrux>(TryGetPawnOwner());
+}
 
 void UGruxAnimInstance::PlayAttackMontage()
 {
@@ -123,6 +128,26 @@ void UGruxAnimInstance::PlayTount()
 void UGruxAnimInstance::PlayQuake()
 {
 	Montage_Play(Quake, 1.0f);
+}
+
+void UGruxAnimInstance::AnimNotify_OnLeftCollision()
+{
+	Grux->OnLeftCollStart();
+}
+
+void UGruxAnimInstance::AnimNotify_OnLeftCollisionEnd()
+{
+	Grux->OnLeftCollEnd();
+}
+
+void UGruxAnimInstance::AnimNotify_OnRightCollision()
+{
+	Grux->OnRightCollStart();
+}
+
+void UGruxAnimInstance::AnimNotify_OnRightCollisionEnd()
+{
+	Grux->OnRightCollEnd();
 }
 
 void UGruxAnimInstance::PlayStartMontage()

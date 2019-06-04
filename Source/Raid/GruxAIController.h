@@ -29,6 +29,7 @@ public:
 	static const FName Distance;
 	static const FName Direction;
 	static const FName SelectAttackNumber;
+	static const FName SelectAttackNumber2;
 
 private:
 	UPROPERTY()

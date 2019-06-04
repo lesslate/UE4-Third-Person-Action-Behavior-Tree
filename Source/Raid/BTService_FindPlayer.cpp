@@ -60,5 +60,5 @@ void UBTService_FindPlayer::TickNode(UBehaviorTreeComponent & OwnerComp, uint8 *
 	{
 		OwnerComp.GetBlackboardComponent()->SetValueAsObject(AGruxAIController::TargetKey, nullptr);
 	}
-
+	
 }
