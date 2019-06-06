@@ -24,6 +24,9 @@ public:
 
 	UPROPERTY()
 	float Radius;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	class ARaidGameMode* GameMode;
 	
 	static const FName TargetKey;
 	static const FName Distance;

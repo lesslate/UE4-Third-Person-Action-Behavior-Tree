@@ -28,6 +28,7 @@ public:
 	void PlayBackJump();
 	void PlayTount();
 	void PlayQuake();
+	void PlayGruxDeath();
 
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 	virtual void NativeBeginPlay() override;
@@ -68,6 +69,9 @@ private:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
 	UAnimMontage* Quake;
 
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
+	UAnimMontage* GruxDeath;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Pawn, Meta = (AllowPrivateAccess = true))
 	float CurrentPawnSpeed;
 	
@@ -83,4 +87,6 @@ private:
 	UFUNCTION()
 	void AnimNotify_OnRightCollisionEnd();
 	
+	UFUNCTION()
+	void AnimNotify_RadialDamage();
 };

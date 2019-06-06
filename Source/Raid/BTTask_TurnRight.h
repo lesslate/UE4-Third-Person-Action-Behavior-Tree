@@ -4,18 +4,18 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
-#include "BTTaskNode_TurnRight.generated.h"
+#include "BTTask_TurnRight.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class RAID_API UBTTaskNode_TurnRight : public UBTTaskNode
+class RAID_API UBTTask_TurnRight : public UBTTaskNode
 {
 	GENERATED_BODY()
 	
 public:
-	UBTTaskNode_TurnRight();
+	UBTTask_TurnRight();
 
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 

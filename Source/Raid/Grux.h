@@ -17,6 +17,9 @@ public:
 	// Sets default values for this character's properties
 	AGrux();
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	class ARaidGameMode* GameMode;
+
 	void Attack();
 	void DashAttack();
 	void TurnLeft();
@@ -31,18 +34,30 @@ public:
 
 	void Death();
 	void AIStart();
-
+	void RadialDamage();
 
 	void OnLeftCollStart();
 	void OnLeftCollEnd();
 	void OnRightCollStart();
 	void OnRightCollEnd();
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Stat)
+	float GruxHP;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Stat)
+	float GruxMaxHP;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character Stat")
+	float Damage;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Stat)
+	bool IsDeath;
 
 	FOnAttackEndDelegate OnAttackEnd;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
 
 
 protected:
@@ -64,12 +79,20 @@ protected:
 	UFUNCTION()
 	void AttackCheckOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
+	virtual float TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+
 	///////// ServerApplyDamage  //////////////////
 
 	UFUNCTION(Reliable, Server, WithValidation)
 	void ServerApplyDamage(AActor* DamagedActor, float Damamge, AActor* DamageCauser);
 	void ServerApplyDamage_Implementation(AActor* DamagedActor, float Damamge, AActor* DamageCauser);
 	bool ServerApplyDamage_Validate(AActor* DamagedActor, float Damamge, AActor* DamageCauser);
+
+	///////// ServerApplyRadialDamage /////////////
+	UFUNCTION(Reliable, Server, WithValidation)
+	void ServerApplyRadialDamage();
+	void ServerApplyRadialDamage_Implementation();
+	bool ServerApplyRadialDamage_Validate();
 
 public:	
 	// Called every frame
@@ -80,14 +103,6 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 private:
-	UPROPERTY(VisibleAnywhere)
-	float HP;
-
-	UPROPERTY(VisibleAnywhere)
-	float Damage;
-
-	UPROPERTY(VisibleAnywhere)
-	bool IsDeath;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
 	bool IsAttacking;

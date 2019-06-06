@@ -41,12 +41,13 @@ void UBTService_FindPlayer::TickNode(UBehaviorTreeComponent & OwnerComp, uint8 *
 		FCollisionShape::MakeSphere(DetectRadius),
 		CollisionQueryParam
 	);
-
+	
 	if (bResult)
 	{
 		for (auto OverlapResult : OverlapResults)
 		{
 			ARaidPlayer* Player = Cast<ARaidPlayer>(OverlapResult.GetActor());
+			
 			if (Player && Player->GetController()->IsPlayerController())
 			{
 				OwnerComp.GetBlackboardComponent()->SetValueAsObject(AGruxAIController::TargetKey, Player); // ≈∏∞Ÿ ¿˙¿Â

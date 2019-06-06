@@ -73,6 +73,12 @@ UGruxAnimInstance::UGruxAnimInstance()
 	{
 		Quake = QUAKE.Object;
 	}
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> DEATH(TEXT("AnimMontage'/Game/ParagonGrux/Characters/Heroes/Grux/Animations/Death_B_Montage.Death_B_Montage'"));
+	if (DEATH.Succeeded())
+	{
+		GruxDeath = DEATH.Object;
+	}
 }
 
 void UGruxAnimInstance::NativeBeginPlay()
@@ -130,6 +136,11 @@ void UGruxAnimInstance::PlayQuake()
 	Montage_Play(Quake, 1.0f);
 }
 
+void UGruxAnimInstance::PlayGruxDeath()
+{
+	Montage_Play(GruxDeath, 1.0f);
+}
+
 void UGruxAnimInstance::AnimNotify_OnLeftCollision()
 {
 	Grux->OnLeftCollStart();
@@ -148,6 +159,11 @@ void UGruxAnimInstance::AnimNotify_OnRightCollision()
 void UGruxAnimInstance::AnimNotify_OnRightCollisionEnd()
 {
 	Grux->OnRightCollEnd();
+}
+
+void UGruxAnimInstance::AnimNotify_RadialDamage()
+{
+	Grux->RadialDamage();
 }
 
 void UGruxAnimInstance::PlayStartMontage()

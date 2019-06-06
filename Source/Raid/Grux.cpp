@@ -12,6 +12,7 @@
 #include "Math/UnrealMathUtility.h"
 #include "GruxAIController.h"
 #include "GruxAnimInstance.h"
+#include "RaidGameMode.h"
 
 // Sets default values
 AGrux::AGrux()
@@ -19,7 +20,9 @@ AGrux::AGrux()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	Damage = 30;
+	Damage = 500;
+	GruxMaxHP = 400000;
+	GruxHP = GruxMaxHP;
 
 	AIControllerClass = AGruxAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
@@ -73,6 +76,8 @@ void AGrux::BeginPlay()
 	}
 }
 
+/////////////// Apply damage////////////
+
 void AGrux::ServerApplyDamage_Implementation(AActor * DamagedActor, float Damamge, AActor * DamageCauser)
 {
 	UGameplayStatics::ApplyDamage(DamagedActor, Damage, nullptr, DamageCauser, nullptr);
@@ -84,6 +89,22 @@ bool AGrux::ServerApplyDamage_Validate(AActor * DamagedActor, float Damamge, AAc
 {
 	return true;
 }
+
+////////////////////Radial damage/////////////////
+
+void AGrux::ServerApplyRadialDamage_Implementation()
+{
+	UGameplayStatics::ApplyRadialDamage(GetWorld(), Damage*2.5, this->GetActorLocation(),1000, nullptr, TArray<AActor*>(), this, false, ECC_Visibility);
+	GruxLeftCheck->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GruxRightCheck->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+
+bool AGrux::ServerApplyRadialDamage_Validate()
+{
+	return true;
+}
+/////////////////
 
 // Called every frame
 void AGrux::Tick(float DeltaTime)
@@ -97,12 +118,15 @@ void AGrux::PostInitializeComponents()
 	Super::PostInitializeComponents();
 	GruxAnim = Cast<UGruxAnimInstance>(GetMesh()->GetAnimInstance());
 	GruxAI = Cast<AGruxAIController>(GetController());
+	GameMode = Cast<ARaidGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 	if (nullptr != GruxAnim)
 	{
 		GruxAnim->OnMontageEnded.AddDynamic(this, &AGrux::OnAttackMontageEnded);
 	}
 	GruxLeftCheck->OnComponentBeginOverlap.AddDynamic(this, &AGrux::AttackCheckOverlap);
 	GruxRightCheck->OnComponentBeginOverlap.AddDynamic(this, &AGrux::AttackCheckOverlap);
+
+
 }
 
 // Called to bind functionality to input
@@ -115,20 +139,39 @@ void AGrux::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 void AGrux::AttackCheckOverlap(UPrimitiveComponent* OverlappedComp, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
 	FVector OverlapLocation = OverlappedComp->GetComponentLocation();
-
+	
 	if (OtherActor != this)
 	{
+		LOG(Warning, TEXT("Damage:%d"),Damage);
 		ServerApplyDamage(OtherActor, Damage, this);
 	}
 }
+
+float AGrux::TakeDamage(float Damage, FDamageEvent const & DamageEvent, AController * EventInstigator, AActor * DamageCauser)
+{
+	const float ActualDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
+	if (ActualDamage > 0.f)
+	{
+		GruxHP -= ActualDamage;
+		if (GruxHP <= 0.f&&!IsDeath)
+		{
+			IsDeath = true;
+			GruxAnim->PlayGruxDeath();
+			GruxAI->StopAI();
+		}
+	}
+		return ActualDamage;
+}
+
+
 
 void AGrux::Attack()
 {
 	if (!IsAttacking)
 	{
+		Damage *= 1.4;
 		GruxAnim->PlayAttackMontage();
-		IsAttacking = true;
-		
+		IsAttacking = true;	
 	}
 }
 
@@ -136,6 +179,7 @@ void AGrux::DashAttack()
 {
 	if (!IsAttacking)
 	{
+		Damage *= 2.0;
 		GruxAnim->PlayAttackMontage2();
 		IsAttacking = true;
 	}
@@ -172,8 +216,11 @@ void AGrux::FourStrike()
 {
 	if (!IsAttacking)
 	{
+		Damage *= 1.5;
+
 		GruxAnim->PlayFourStrike();
 		IsAttacking = true;
+		
 	}
 }
 
@@ -181,6 +228,7 @@ void AGrux::DoublePain()
 {
 	if (!IsAttacking)
 	{
+		Damage *= 1.3;
 		GruxAnim->PlayDoublePain();
 		IsAttacking = true;
 	}
@@ -208,6 +256,7 @@ void AGrux::Quake()
 {
 	if (!IsAttacking)
 	{
+		Damage *= 2.0;
 		GruxAnim->PlayQuake();
 		IsAttacking = true;
 	}
@@ -219,10 +268,14 @@ void AGrux::AIStart()
 	GruxAI->StartAI();
 }
 
+void AGrux::RadialDamage()
+{
+	ServerApplyRadialDamage();
+}
+
 void AGrux::OnLeftCollStart() // 노티파이 발생시 공격 컬리전 체크
 {
 	GruxLeftCheck->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	LOG(Warning, TEXT("Left!"));
 }
 
 void AGrux::OnLeftCollEnd()
@@ -233,7 +286,6 @@ void AGrux::OnLeftCollEnd()
 void AGrux::OnRightCollStart() 
 {
 	GruxRightCheck->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	LOG(Warning, TEXT("Right!!"));
 }
 
 void AGrux::OnRightCollEnd()
@@ -245,7 +297,10 @@ void AGrux::OnAttackMontageEnded(UAnimMontage * Montage, bool bInterrupted)
 {
 	if (IsAttacking)
 	{
+		Damage = 500.0f;
 		IsAttacking = false;
 		OnAttackEnd.Broadcast();
 	}
+	GruxLeftCheck->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GruxRightCheck->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }

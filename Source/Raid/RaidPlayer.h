@@ -19,6 +19,11 @@ public:
 	void MoveRight(float Value);
 	void Jump();
 	void StopJumping();
+	void PlayerDeath();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	class ARaidGameMode* GameMode;
+
 	//////////     Sprint   //////////////////////
 
 	UFUNCTION(Reliable, Server, WithValidation)
@@ -99,12 +104,26 @@ public:
 
 	void DodgeEndState();
 
+	UPROPERTY()
+	bool IsDeath;
+
 	UFUNCTION()
 	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Stat)
+	float PlayerHP;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Stat)
+	float PlayerMaxHP;
+
+	UPROPERTY(VisibleAnywhere, Category = Stat)
+	class URaidPlayerStatComponent* CharacterStat;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	virtual float TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 	// 스프링암 컴포넌트
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
@@ -169,6 +188,7 @@ private:
 	UPROPERTY()
 	bool IsRun;
 
+	
 	UPROPERTY()
 	bool IsDodge;
 

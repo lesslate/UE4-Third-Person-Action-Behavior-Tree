@@ -6,6 +6,7 @@
 #include "ConstructorHelpers.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
+#include "RaidGameMode.h"
 
 
 
@@ -40,6 +41,12 @@ void AGruxAIController::Possess(APawn * InPawn)
 	{
 		LOG(Warning, TEXT("BT NOT FOUND"));
 	}
+
+	GameMode = Cast<ARaidGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+	if (nullptr != GameMode)
+	{
+		GameMode->PlayerDead.AddUObject(this, &AGruxAIController::StopAI);
+	}
 }
 
 void AGruxAIController::StopAI()
@@ -48,7 +55,6 @@ void AGruxAIController::StopAI()
 	if (nullptr != BehaviorTreeComponent)
 	{
 		BehaviorTreeComponent->StopTree(EBTStopMode::Safe);
-		
 	}
 }
 

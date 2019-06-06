@@ -4,19 +4,19 @@
 
 #include "Raid.h"
 #include "BehaviorTree/BTTaskNode.h"
-#include "BTTaskNode_TurnLeft.generated.h"
+#include "BTTask_GruxDashAttack.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class RAID_API UBTTaskNode_TurnLeft : public UBTTaskNode
+class RAID_API UBTTask_GruxDashAttack : public UBTTaskNode
 {
 	GENERATED_BODY()
 	
 public:
-	UBTTaskNode_TurnLeft();
-
+	UBTTask_GruxDashAttack();
+	
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
 protected:

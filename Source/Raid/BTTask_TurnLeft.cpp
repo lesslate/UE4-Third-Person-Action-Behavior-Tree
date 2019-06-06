@@ -1,16 +1,16 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "BTTaskNode_GruxDashAttack.h"
+#include "BTTask_TurnLeft.h"
 #include "GruxAIController.h"
 #include "Grux.h"
 
-UBTTaskNode_GruxDashAttack::UBTTaskNode_GruxDashAttack()
+UBTTask_TurnLeft::UBTTask_TurnLeft()
 {
 	bNotifyTick = true;
 	IsAttacking = false;
 }
 
-EBTNodeResult::Type UBTTaskNode_GruxDashAttack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
+EBTNodeResult::Type UBTTask_TurnLeft::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	EBTNodeResult::Type Result = Super::ExecuteTask(OwnerComp, NodeMemory);
 
@@ -20,7 +20,7 @@ EBTNodeResult::Type UBTTaskNode_GruxDashAttack::ExecuteTask(UBehaviorTreeCompone
 		return EBTNodeResult::Failed;
 
 
-	Grux->DashAttack();
+	Grux->TurnLeft();
 	IsAttacking = true;
 
 
@@ -33,7 +33,7 @@ EBTNodeResult::Type UBTTaskNode_GruxDashAttack::ExecuteTask(UBehaviorTreeCompone
 
 }
 
-void UBTTaskNode_GruxDashAttack::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
+void UBTTask_TurnLeft::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
 	Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
 	if (!IsAttacking)
@@ -41,6 +41,8 @@ void UBTTaskNode_GruxDashAttack::TickTask(UBehaviorTreeComponent& OwnerComp, uin
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 	}
 }
+
+
 
 
 

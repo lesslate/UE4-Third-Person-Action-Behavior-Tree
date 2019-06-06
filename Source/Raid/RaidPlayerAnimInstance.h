@@ -31,6 +31,7 @@ public:
 	void PlayDashAttack();
 	void PlayDodge();
 	void JumpToAttackMontageSection(int32 NewSection);
+	void PlayDead();
 
 public:
 	FOnNextAttackCheckDelegate OnNextAttackCheck;
@@ -74,4 +75,7 @@ private:
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
 	UAnimMontage* Dodge;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
+	UAnimMontage* Dead;
 };

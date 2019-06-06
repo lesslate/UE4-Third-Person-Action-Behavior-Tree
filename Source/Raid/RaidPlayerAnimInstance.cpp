@@ -35,6 +35,12 @@ URaidPlayerAnimInstance::URaidPlayerAnimInstance()
 		Dodge = Dodge_Montage.Object;
 	}
 
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> Dead_Montage(TEXT("AnimMontage'/Game/TwinbladesAnimsetBase/RootMotion/Twinblades_Dead_Montage.Twinblades_Dead_Montage'"));
+	if (Dead_Montage.Succeeded())
+	{
+		Dead = Dead_Montage.Object;
+	}
+
 }
 
 void URaidPlayerAnimInstance::NativeBeginPlay()
@@ -61,6 +67,11 @@ void URaidPlayerAnimInstance::PlayAttackMontage()
 void URaidPlayerAnimInstance::PlayAttackMontage2()
 {
 	Montage_Play(AttackMontage2, 1.0f);
+}
+
+void URaidPlayerAnimInstance::PlayDead()
+{
+	Montage_Play(Dead, 1.0f);
 }
 
 void URaidPlayerAnimInstance::PlayDashAttack()

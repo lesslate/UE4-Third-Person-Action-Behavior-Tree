@@ -3,6 +3,8 @@
 #include "RaidGameMode.h"
 #include "RaidPlayer.h"
 #include "UObject/ConstructorHelpers.h"
+#include "RaidPlayerController.h"
+#include "RaidPlayerState.h"
 
 ARaidGameMode::ARaidGameMode()
 {
@@ -11,5 +13,7 @@ ARaidGameMode::ARaidGameMode()
 	if (PlayerPawnBPClass.Class != NULL)
 	{
 		DefaultPawnClass = PlayerPawnBPClass.Class;
+		PlayerControllerClass = ARaidPlayerController::StaticClass();
+		PlayerStateClass = ARaidPlayerState::StaticClass();
 	}
 }

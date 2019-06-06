@@ -14,6 +14,9 @@
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
 #include "Runtime/Engine/Classes/Components/AudioComponent.h"
+#include "RaidPlayerStatComponent.h"
+#include "RaidPlayerController.h"
+#include "RaidGameMode.h"
 
 // Sets default values
 ARaidPlayer::ARaidPlayer()
@@ -25,6 +28,8 @@ ARaidPlayer::ARaidPlayer()
 	bReplicates = true;
 
 	Damage = 5000;
+	PlayerMaxHP = 10000;
+	PlayerHP = 10000;
 
 	GetCharacterMovement()->JumpZVelocity = 350.0f;
 	GetCharacterMovement()->AirControl = 0.2f;
@@ -82,6 +87,9 @@ ARaidPlayer::ARaidPlayer()
 	AttackCheck = CreateDefaultSubobject<UCapsuleComponent>(TEXT("AttackCheck"));
 	AttackCheck->SetupAttachment(GetMesh(), TEXT("BladeLeft"));
 
+	// 스텟 컴포넌트
+	CharacterStat = CreateDefaultSubobject<URaidPlayerStatComponent>(TEXT("CharacterStat"));
+
 	// 달리기 속도 배수
 	SprintSpeedMultiplier = 2.0f;
 
@@ -97,9 +105,24 @@ void ARaidPlayer::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	GameMode = Cast<ARaidGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 	
 }
 
+float ARaidPlayer::TakeDamage(float Damage, FDamageEvent const & DamageEvent, AController * EventInstigator, AActor * DamageCauser)
+{
+	const float ActualDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
+	if (ActualDamage > 0.f)
+	{
+		PlayerHP -= ActualDamage;
+		if (PlayerHP <= 0.f)
+		{
+			GameMode->PlayerDead.Broadcast();
+			PlayerDeath();
+		}
+	}
+	return ActualDamage;
+}
 void ARaidPlayer::PostInitializeComponents()
 {	
 	Super::PostInitializeComponents();
@@ -157,6 +180,18 @@ void ARaidPlayer::StopJumping()
 {
 	bPressedJump = false;
 	ResetJumpState();
+}
+
+void ARaidPlayer::PlayerDeath()
+{
+	IsDeath = true;
+	GetCharacterMovement()->SetMovementMode(MOVE_None);
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	PlayerAnim->PlayDead();
+	
+
+	
 }
 
 
@@ -248,7 +283,8 @@ void ARaidPlayer::AttackMulticast_Implementation()
 {
 	IsInAir = GetCharacterMovement()->IsFalling();
 	if (IsInAir) return;
-	
+	if (IsDeath) return;
+
 	if (IsAttacking&&IsDodge) // OnNextAttackCheck 전에 공격시 IsComboInputOn = true 로 다음 공격섹션으로 이어짐
 	{
 		//CHECK(FMath::IsWithinInclusive<int32>(CurrentCombo, 1, MaxCombo));
@@ -286,16 +322,20 @@ void ARaidPlayer::AttackMulticast2_Implementation()
 {
 	IsInAir = GetCharacterMovement()->IsFalling();
 	if (IsInAir) return;
+	if (IsDeath) return;
 
 	if (!IsAttacking&&!IsDodge)
 	{
 		if (IsRun)
 		{
-			Damage = 8000;
+			Damage *= 1.5 ;
+			LOG(Warning, TEXT("Damage:%f"), Damage);
 			PlayerAnim->PlayDashAttack();
 		}
 		else
 		{
+			Damage *= 2.8;
+			LOG(Warning, TEXT("Damage:%f"), Damage);
 			PlayerAnim->PlayAttackMontage2();
 		}
 	}
@@ -357,9 +397,14 @@ void ARaidPlayer::DodgeMulticast_Implementation()
 {
 	IsInAir = GetCharacterMovement()->IsFalling();
 	if (IsInAir) return;
+	if (IsDeath) return;
 
-	if(!IsDodge&&!IsAttacking)
+	bCanBeDamaged = false;
+
+	if (!IsDodge && !IsAttacking)
 	PlayerAnim->PlayDodge();
+
+	
 	IsDodge = true;
 	IsAttacking = true;
 }
@@ -372,7 +417,10 @@ void ARaidPlayer::AttackStartComboState()
 	CanNextCombo = true;
 	IsComboInputOn = false;
 	CHECK(FMath::IsWithinInclusive<int32>(CurrentCombo, 0, MaxCombo - 1));
+	
 	CurrentCombo = FMath::Clamp<int32>(CurrentCombo + 1, 1, MaxCombo);
+	Damage += Damage * 0.2;
+	LOG(Warning, TEXT("Damage:%f"), Damage);
 	
 }
 
@@ -397,6 +445,8 @@ void ARaidPlayer::OnCollEnd()
 
 void ARaidPlayer::DodgeEndState()
 {
+	bCanBeDamaged = true;
+	
 	IsDodge = false;
 	IsAttacking = false;
 }
@@ -414,8 +464,9 @@ void ARaidPlayer::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 	Damage = 5000;
 }
 
-//Property Replicate
 
+
+//Property Replicate
 void ARaidPlayer::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);

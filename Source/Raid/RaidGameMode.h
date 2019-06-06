@@ -6,6 +6,8 @@
 #include "GameFramework/GameModeBase.h"
 #include "RaidGameMode.generated.h"
 
+DECLARE_MULTICAST_DELEGATE(FPlayerDead);
+
 UCLASS(minimalapi)
 class ARaidGameMode : public AGameModeBase
 {
@@ -13,6 +15,8 @@ class ARaidGameMode : public AGameModeBase
 
 public:
 	ARaidGameMode();
+
+	FPlayerDead PlayerDead;
 };
 
 

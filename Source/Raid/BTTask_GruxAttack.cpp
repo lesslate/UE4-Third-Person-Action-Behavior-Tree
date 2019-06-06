@@ -1,26 +1,26 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "BTTaskNode_TurnRight.h"
+#include "BTTask_GruxAttack.h"
 #include "GruxAIController.h"
 #include "Grux.h"
 
-UBTTaskNode_TurnRight::UBTTaskNode_TurnRight()
+UBTTask_GruxAttack::UBTTask_GruxAttack()
 {
 	bNotifyTick = true;
 	IsAttacking = false;
 }
 
-EBTNodeResult::Type UBTTaskNode_TurnRight::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
+EBTNodeResult::Type UBTTask_GruxAttack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	EBTNodeResult::Type Result = Super::ExecuteTask(OwnerComp, NodeMemory);
 
 	auto Grux = Cast<AGrux>(OwnerComp.GetAIOwner()->GetPawn());
 
 	if (nullptr == Grux)
-		return EBTNodeResult::Failed;
+	return EBTNodeResult::Failed;
 
 
-	Grux->TurnRight();
+	Grux->Attack();
 	IsAttacking = true;
 
 
@@ -33,7 +33,7 @@ EBTNodeResult::Type UBTTaskNode_TurnRight::ExecuteTask(UBehaviorTreeComponent& O
 
 }
 
-void UBTTaskNode_TurnRight::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
+void UBTTask_GruxAttack::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
 	Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
 	if (!IsAttacking)
@@ -41,7 +41,6 @@ void UBTTaskNode_TurnRight::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* N
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 	}
 }
-
 
 
 

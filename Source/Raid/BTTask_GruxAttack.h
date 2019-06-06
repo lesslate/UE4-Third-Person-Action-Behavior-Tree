@@ -4,18 +4,18 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
-#include "BTTaskNode_GruxAttack.generated.h"
+#include "BTTask_GruxAttack.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class RAID_API UBTTaskNode_GruxAttack : public UBTTaskNode
+class RAID_API UBTTask_GruxAttack : public UBTTaskNode
 {
 	GENERATED_BODY()
 	
 public:
-	UBTTaskNode_GruxAttack();
+	UBTTask_GruxAttack();
 	
 
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
