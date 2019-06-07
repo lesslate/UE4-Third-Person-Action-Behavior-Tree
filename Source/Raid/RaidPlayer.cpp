@@ -115,6 +115,12 @@ float ARaidPlayer::TakeDamage(float Damage, FDamageEvent const & DamageEvent, AC
 	if (ActualDamage > 0.f)
 	{
 		PlayerHP -= ActualDamage;
+		if (!IsHit && !IsAttacking && !IsDodge)
+		{
+		PlayerAnim->PlayHitMontage();
+		IsHit = true;
+		bCanBeDamaged = false;
+		}
 		if (PlayerHP <= 0.f)
 		{
 			GameMode->PlayerDead.Broadcast();
@@ -171,7 +177,7 @@ void ARaidPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 void ARaidPlayer::Jump()
 {
-	if (IsDodge || IsAttacking) return;
+	if (IsDodge || IsAttacking|| IsHit ) return;
 	bPressedJump = true;
 	JumpKeyHoldTime = 0.0f;
 }
@@ -282,8 +288,7 @@ bool ARaidPlayer::AttackServer_Validate()
 void ARaidPlayer::AttackMulticast_Implementation()
 {
 	IsInAir = GetCharacterMovement()->IsFalling();
-	if (IsInAir) return;
-	if (IsDeath) return;
+	if (IsInAir || IsDeath || IsHit) return;
 
 	if (IsAttacking&&IsDodge) // OnNextAttackCheck 전에 공격시 IsComboInputOn = true 로 다음 공격섹션으로 이어짐
 	{
@@ -321,8 +326,7 @@ bool ARaidPlayer::AttackServer2_Validate()
 void ARaidPlayer::AttackMulticast2_Implementation()
 {
 	IsInAir = GetCharacterMovement()->IsFalling();
-	if (IsInAir) return;
-	if (IsDeath) return;
+	if (IsInAir || IsDeath || IsHit) return;
 
 	if (!IsAttacking&&!IsDodge)
 	{
@@ -396,8 +400,8 @@ bool ARaidPlayer::DodgeServer_Validate()
 void ARaidPlayer::DodgeMulticast_Implementation()
 {
 	IsInAir = GetCharacterMovement()->IsFalling();
-	if (IsInAir) return;
-	if (IsDeath) return;
+	if (IsInAir || IsDeath || IsHit) return;
+	
 
 	bCanBeDamaged = false;
 
@@ -454,10 +458,12 @@ void ARaidPlayer::DodgeEndState()
 void ARaidPlayer::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
 	
-	CHECK(IsAttacking);
+	//CHECK(IsAttacking);
 	//CHECK(CurrentCombo > 0);
 	IsAttacking = false;
 	IsDodge = false;
+	IsHit = false;
+	bCanBeDamaged = true;
 
 	AttackEndComboState();
 	AttackCheck->SetCollisionEnabled(ECollisionEnabled::NoCollision);
