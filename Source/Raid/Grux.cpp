@@ -13,7 +13,7 @@
 #include "GruxAIController.h"
 #include "GruxAnimInstance.h"
 #include "RaidGameMode.h"
-
+#include "Runtime/Engine/Classes/Particles/ParticleSystemComponent.h"
 // Sets default values
 AGrux::AGrux()
 {
@@ -21,7 +21,7 @@ AGrux::AGrux()
 	PrimaryActorTick.bCanEverTick = true;
 
 	Damage = 500;
-	GruxMaxHP = 400000;
+	GruxMaxHP = 100000;
 	GruxHP = GruxMaxHP;
 
 	AIControllerClass = AGruxAIController::StaticClass();
@@ -47,6 +47,8 @@ AGrux::AGrux()
 	{
 		GetMesh()->SetAnimInstanceClass(GRUXANIM.Class);
 	}
+	Particle = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Particle"));
+	Particle->SetupAttachment(GetMesh());
 
 	// 오디오 컴포넌트 초기화
 	AudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("GruxAudio"));
@@ -92,15 +94,15 @@ bool AGrux::ServerApplyDamage_Validate(AActor * DamagedActor, float Damamge, AAc
 
 ////////////////////Radial damage/////////////////
 
-void AGrux::ServerApplyRadialDamage_Implementation()
+void AGrux::ServerApplyRadialDamage_Implementation(float RDamage,float Radius)
 {
-	UGameplayStatics::ApplyRadialDamage(GetWorld(), Damage*2.5, this->GetActorLocation(),1000, nullptr, TArray<AActor*>(), this, false, ECC_Visibility);
+	UGameplayStatics::ApplyRadialDamage(GetWorld(), RDamage, this->GetActorLocation(), Radius, nullptr, TArray<AActor*>(), this, false, ECC_Visibility);
 	GruxLeftCheck->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GruxRightCheck->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 
-bool AGrux::ServerApplyRadialDamage_Validate()
+bool AGrux::ServerApplyRadialDamage_Validate(float RDamage, float Radius)
 {
 	return true;
 }
@@ -153,12 +155,24 @@ float AGrux::TakeDamage(float Damage, FDamageEvent const & DamageEvent, AControl
 	if (ActualDamage > 0.f)
 	{
 		GruxHP -= ActualDamage;
-		if (GruxHP <= 0.f&&!IsDeath)
+		if (GruxHP <= 0.f && !IsDeath)
 		{
 			IsDeath = true;
 			GruxAnim->PlayGruxDeath();
 			GruxAI->StopAI();
+			Particle->Deactivate();
 		}
+		if (GruxHP <= GruxMaxHP / 2&&!PowerUP)
+		{
+			GruxAI->StopAI();
+			PowerUP = true;
+			Damage *= 1.5;
+			GruxAnim->PlayGruxPowerUP();
+			GetWorld()->GetTimerManager().SetTimer(timer, this, &AGrux::AIStart, 2.0f, false);
+			Particle->Activate(true);
+			
+		}
+
 	}
 		return ActualDamage;
 }
@@ -270,8 +284,14 @@ void AGrux::AIStart()
 
 void AGrux::RadialDamage()
 {
-	ServerApplyRadialDamage();
+	ServerApplyRadialDamage(Damage*2.5, 1000);
 }
+
+void AGrux::RadialDamage2()
+{
+	ServerApplyRadialDamage(Damage*3.0, 2000);
+}
+
 
 void AGrux::OnLeftCollStart() // 노티파이 발생시 공격 컬리전 체크
 {
@@ -300,6 +320,7 @@ void AGrux::OnAttackMontageEnded(UAnimMontage * Montage, bool bInterrupted)
 		Damage = 500.0f;
 		IsAttacking = false;
 		OnAttackEnd.Broadcast();
+		if (PowerUP) Damage = 750.0f;
 	}
 	GruxLeftCheck->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GruxRightCheck->SetCollisionEnabled(ECollisionEnabled::NoCollision);

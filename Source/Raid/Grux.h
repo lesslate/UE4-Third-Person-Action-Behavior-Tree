@@ -30,11 +30,12 @@ public:
 	void BackJump();
 	void Tount();
 	void Quake();
-
+	
 
 	void Death();
 	void AIStart();
 	void RadialDamage();
+	void RadialDamage2();
 
 	void OnLeftCollStart();
 	void OnLeftCollEnd();
@@ -53,6 +54,12 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Stat)
 	bool IsDeath;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Stat)
+	bool PowerUP;
+
+	UPROPERTY()
+	class UParticleSystem * BuffParticle;
+
 	FOnAttackEndDelegate OnAttackEnd;
 protected:
 	// Called when the game starts or when spawned
@@ -63,6 +70,9 @@ protected:
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Audio")
 	class UAudioComponent* AudioComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Particle")
+	class UParticleSystemComponent* Particle;
 
 	// ¹«±â Ä¸½¶ ÄÃ¸®Àü1
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Mesh)
@@ -90,9 +100,9 @@ protected:
 
 	///////// ServerApplyRadialDamage /////////////
 	UFUNCTION(Reliable, Server, WithValidation)
-	void ServerApplyRadialDamage();
-	void ServerApplyRadialDamage_Implementation();
-	bool ServerApplyRadialDamage_Validate();
+	void ServerApplyRadialDamage(float RDamage, float Radius);
+	void ServerApplyRadialDamage_Implementation(float RDamage, float Radius);
+	bool ServerApplyRadialDamage_Validate(float RDamage, float Radius);
 
 public:	
 	// Called every frame

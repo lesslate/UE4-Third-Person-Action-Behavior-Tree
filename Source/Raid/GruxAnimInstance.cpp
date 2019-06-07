@@ -79,6 +79,13 @@ UGruxAnimInstance::UGruxAnimInstance()
 	{
 		GruxDeath = DEATH.Object;
 	}
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> POWERUP(TEXT("AnimMontage'/Game/ParagonGrux/Characters/Heroes/Grux/Animations/Ultimate_Roar_Montage.Ultimate_Roar_Montage'"));
+	if (POWERUP.Succeeded())
+	{
+		PowerUP = POWERUP.Object;
+	}
+
 }
 
 void UGruxAnimInstance::NativeBeginPlay()
@@ -141,6 +148,11 @@ void UGruxAnimInstance::PlayGruxDeath()
 	Montage_Play(GruxDeath, 1.0f);
 }
 
+void UGruxAnimInstance::PlayGruxPowerUP()
+{
+	Montage_Play(PowerUP, 1.0f);
+}
+
 void UGruxAnimInstance::AnimNotify_OnLeftCollision()
 {
 	Grux->OnLeftCollStart();
@@ -162,6 +174,11 @@ void UGruxAnimInstance::AnimNotify_OnRightCollisionEnd()
 }
 
 void UGruxAnimInstance::AnimNotify_RadialDamage()
+{
+	Grux->RadialDamage();
+}
+
+void UGruxAnimInstance::AnimNotify_RadialDamage2()
 {
 	Grux->RadialDamage();
 }
