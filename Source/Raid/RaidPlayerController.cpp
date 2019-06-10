@@ -14,6 +14,12 @@ ARaidPlayerController::ARaidPlayerController()
 	}
 }
 
+void ARaidPlayerController::VisibleHUD()
+{
+	CHECK(nullptr != HUDWidget);
+	HUDWidget->SetVisibility(ESlateVisibility::Visible);
+}
+
 void ARaidPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -21,4 +27,5 @@ void ARaidPlayerController::BeginPlay()
 	HUDWidget = CreateWidget<UUI_HUD>(this, HUDWidgetClass);
 	CHECK(nullptr != HUDWidget);
 	HUDWidget->AddToViewport();
+	HUDWidget->SetVisibility(ESlateVisibility::Hidden);
 }

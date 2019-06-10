@@ -20,6 +20,8 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = UI)
 	TSubclassOf<class UUI_HUD> HUDWidgetClass;
 
+	UFUNCTION(BlueprintCallable, Category = "Widget")
+	void VisibleHUD();
 protected:
 	virtual void BeginPlay() override;
 

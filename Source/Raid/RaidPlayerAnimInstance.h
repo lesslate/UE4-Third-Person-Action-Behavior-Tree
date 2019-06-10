@@ -34,6 +34,7 @@ public:
 	void PlayDead();
 	void PlayHitMontage();
 
+
 public:
 	FOnNextAttackCheckDelegate OnNextAttackCheck;
 	FOnAttackHitCheckDelegate OnAttackHitCheck;
