@@ -14,6 +14,8 @@
 #include "GruxAnimInstance.h"
 #include "RaidGameMode.h"
 #include "Runtime/Engine/Classes/Particles/ParticleSystemComponent.h"
+#include "Runtime/Engine/Public/TimerManager.h"
+
 // Sets default values
 AGrux::AGrux()
 {
@@ -21,7 +23,7 @@ AGrux::AGrux()
 	PrimaryActorTick.bCanEverTick = true;
 
 	Damage = 500;
-	GruxMaxHP = 100000;
+	GruxMaxHP = 1000000;
 	GruxHP = GruxMaxHP;
 
 	AIControllerClass = AGruxAIController::StaticClass();
@@ -157,10 +159,7 @@ float AGrux::TakeDamage(float Damage, FDamageEvent const & DamageEvent, AControl
 		GruxHP -= ActualDamage;
 		if (GruxHP <= 0.f && !IsDeath)
 		{
-			IsDeath = true;
-			GruxAnim->PlayGruxDeath();
-			GruxAI->StopAI();
-			Particle->Deactivate();
+			GruxDeath();
 		}
 		if (GruxHP <= GruxMaxHP / 2&&!PowerUP)
 		{
@@ -274,6 +273,15 @@ void AGrux::Quake()
 		GruxAnim->PlayQuake();
 		IsAttacking = true;
 	}
+}
+
+void AGrux::GruxDeath()
+{
+	IsDeath = true;
+	GruxAnim->PlayGruxDeath();
+	GruxAI->StopAI();
+	Particle->Deactivate();
+	GameMode->EndGame.Broadcast();
 }
 
 void AGrux::AIStart()

@@ -33,7 +33,7 @@ ARaidPlayer::ARaidPlayer()
 
 	GetCharacterMovement()->JumpZVelocity = 350.0f;
 	GetCharacterMovement()->AirControl = 0.2f;
-	GetCharacterMovement()->MaxWalkSpeed = 300.0f;
+	GetCharacterMovement()->MaxWalkSpeed = 400.0f;
 	GetCharacterMovement()->bUseControllerDesiredRotation = false;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f);
@@ -269,7 +269,7 @@ bool ARaidPlayer::StopSprintServer_Validate()
 
 void ARaidPlayer::StopSprintMulticast_Implementation()
 {
-	GetCharacterMovement()->MaxWalkSpeed = 300.0f;
+	GetCharacterMovement()->MaxWalkSpeed = 400.0f;
 	IsRun = false;
 }
 

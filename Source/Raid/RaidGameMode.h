@@ -7,6 +7,8 @@
 #include "RaidGameMode.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FPlayerDead);
+DECLARE_MULTICAST_DELEGATE(FStartGame);
+DECLARE_MULTICAST_DELEGATE(FEndGame);
 
 UCLASS(minimalapi)
 class ARaidGameMode : public AGameModeBase
@@ -17,6 +19,8 @@ public:
 	ARaidGameMode();
 
 	FPlayerDead PlayerDead;
+	FStartGame StartGame;
+	FEndGame EndGame;
 };
 
 

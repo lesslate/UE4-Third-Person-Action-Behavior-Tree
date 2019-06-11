@@ -26,4 +26,16 @@ private:
 
 	UPROPERTY()
 	class UProgressBar* HPBar;
+
+	UPROPERTY()
+	class UProgressBar* BossHPBar;
+
+	UPROPERTY()
+	class UTextBlock* BossName;
+
+	UFUNCTION()
+	void VisibleBossHUD();
+
+	UFUNCTION()
+	void HideBossHUD();
 };

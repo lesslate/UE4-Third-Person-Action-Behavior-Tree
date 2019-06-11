@@ -32,7 +32,7 @@ public:
 	void Quake();
 	
 
-	void Death();
+	void GruxDeath();
 	void AIStart();
 	void RadialDamage();
 	void RadialDamage2();

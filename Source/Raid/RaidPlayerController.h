@@ -18,15 +18,20 @@ public:
 	ARaidPlayerController();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = UI)
-	TSubclassOf<class UUI_HUD> HUDWidgetClass;
+	TSubclassOf<class UUI_Result> ResultUIClass;
 
 	UFUNCTION(BlueprintCallable, Category = "Widget")
-	void VisibleHUD();
+	void AddResultUI();
+
+	
+	void AddResultUITimer();
+
+	void SetInputGameUIMode();
 protected:
 	virtual void BeginPlay() override;
 
 private:
 	UPROPERTY()
-	class UUI_HUD* HUDWidget;
+	class UUI_Result* ResultWidget;
 
 };
