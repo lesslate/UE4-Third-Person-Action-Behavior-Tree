@@ -1,8 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "Door.h"
-#include "Components/StaticMeshComponent.h"
-#include "Runtime/Engine/Classes/Particles/ParticleSystemComponent.h"
+#include "DoorTrigger.h"
 #include "ConstructorHelpers.h"
 #include "Runtime/Engine/Classes/Components/BoxComponent.h"
 #include "Runtime/Engine/Classes/Components/SceneComponent.h"
@@ -10,53 +8,41 @@
 #include "RaidGameMode.h"
 #include "Runtime/Engine/Classes/Engine/World.h"
 
-
-
 // Sets default values
-ADoor::ADoor()
+ADoorTrigger::ADoorTrigger()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
-
 	Default = CreateDefaultSubobject<USceneComponent>(TEXT("Default"));
 	RootComponent = Default;
 
-	Block = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxBlock"));
-	Block->SetupAttachment(RootComponent);
-	LockParticle = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Particle"));
-	LockParticle->SetupAttachment(RootComponent);
-	
-	
+	BoxTrigger = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxTrigger"));
+	BoxTrigger->SetupAttachment(RootComponent);
 }
 
+
 // Called when the game starts or when spawned
-void ADoor::BeginPlay()
+void ADoorTrigger::BeginPlay()
 {
 	Super::BeginPlay();
+	BoxTrigger->OnComponentBeginOverlap.AddDynamic(this, &ADoorTrigger::AttackCheckOverlap);
 	GameMode = Cast<ARaidGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
-	if (nullptr != GameMode)
-	{
-		GameMode->StartGame.AddUObject(this, &ADoor::CloseDoor);
-		GameMode->EndGame.AddUObject(this, &ADoor::OpenDoor);
-	}
+	
 }
 
 // Called every frame
-void ADoor::Tick(float DeltaTime)
+void ADoorTrigger::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 }
 
-void ADoor::CloseDoor()
+void ADoorTrigger::AttackCheckOverlap(UPrimitiveComponent * OverlappedComp, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
-	Block->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	LockParticle->Activate(true);
+	if (nullptr != GameMode)
+	{
+		GameMode->StartGame.Broadcast();
+		Destroy();
+	}
 }
 
-void ADoor::OpenDoor()
-{
-	Block->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	LockParticle->Deactivate();
-}

@@ -4,16 +4,16 @@
 
 #include "Raid.h"
 #include "GameFramework/Actor.h"
-#include "Door.generated.h"
+#include "DoorTrigger.generated.h"
 
 UCLASS()
-class RAID_API ADoor : public AActor
+class RAID_API ADoorTrigger : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	ADoor();
+	ADoorTrigger();
 
 protected:
 	// Called when the game starts or when spawned
@@ -23,20 +23,18 @@ protected:
 	class USceneComponent* Default;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Mesh)
-	class UBoxComponent* Block;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Particle)
-	class UParticleSystemComponent* LockParticle;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	class ARaidGameMode* GameMode;
-
-
+	class UBoxComponent* BoxTrigger;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	class ARaidGameMode* GameMode;
+
 private:
-	void CloseDoor();
-	void OpenDoor();
+	UFUNCTION()
+	void AttackCheckOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	
+	
 };
