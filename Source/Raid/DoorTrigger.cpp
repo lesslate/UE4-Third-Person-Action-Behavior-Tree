@@ -7,6 +7,7 @@
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 #include "RaidGameMode.h"
 #include "Runtime/Engine/Classes/Engine/World.h"
+#include "Sound/SoundCue.h"
 
 // Sets default values
 ADoorTrigger::ADoorTrigger()
@@ -18,6 +19,12 @@ ADoorTrigger::ADoorTrigger()
 
 	BoxTrigger = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxTrigger"));
 	BoxTrigger->SetupAttachment(RootComponent);
+
+	static ConstructorHelpers::FObjectFinder<USoundCue>LOCK(TEXT("SoundCue'/Game/Sound/GruxSound/GateLock_Cue.GateLock_Cue'"));
+	if (LOCK.Succeeded())
+	{
+		LockCue = LOCK.Object;
+	}
 }
 
 
@@ -41,6 +48,7 @@ void ADoorTrigger::AttackCheckOverlap(UPrimitiveComponent * OverlappedComp, AAct
 {
 	if (nullptr != GameMode)
 	{
+		UGameplayStatics::PlaySound2D(GetWorld(), LockCue);
 		GameMode->StartGame.Broadcast();
 		Destroy();
 	}
