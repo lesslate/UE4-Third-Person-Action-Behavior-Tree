@@ -3,6 +3,7 @@
 #include "RaidPlayerController.h"
 #include "ConstructorHelpers.h"
 #include "UI_Result.h"
+#include "UI_Death.h"
 #include "WidgetComponent.h"
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 #include "RaidGameMode.h"
@@ -16,14 +17,13 @@ ARaidPlayerController::ARaidPlayerController()
 	{
 		ResultUIClass = UI_Result_C.Class;
 	}
+
+	static ConstructorHelpers::FClassFinder<UUI_Death> UI_DEATH(TEXT("WidgetBlueprint'/Game/UI/BP_Death.BP_Death_C'"));
+	if (UI_DEATH.Succeeded())
+	{
+		DeathUIClass = UI_DEATH.Class;
+	}
 }
-
-//void ARaidPlayerController::VisibleHUD()
-//{
-//	CHECK(nullptr != HUDWidget);
-//	HUDWidget->SetVisibility(ESlateVisibility::Visible);
-//}
-
 
 void ARaidPlayerController::BeginPlay()
 {
@@ -33,7 +33,7 @@ void ARaidPlayerController::BeginPlay()
 	if (GameMode != nullptr)
 	{
 		GameMode->EndGame.AddUObject(this, &ARaidPlayerController::AddResultUITimer);
-		//GameMode->EndGame.AddUObject(this, &ARaidPlayerController::SetInputGameUIMode);
+		GameMode->PlayerDead.AddUObject(this, &ARaidPlayerController::AddDeathUITimer);
 	}
 
 }
@@ -42,6 +42,12 @@ void ARaidPlayerController::AddResultUITimer()
 {
 	FTimerHandle timer;
 	GetWorld()->GetTimerManager().SetTimer(timer, this, &ARaidPlayerController::AddResultUI, 5.2f, false);
+}
+
+void ARaidPlayerController::AddDeathUITimer()
+{
+	FTimerHandle timer;
+	GetWorld()->GetTimerManager().SetTimer(timer, this, &ARaidPlayerController::AddDeathUI, 5.2f, false);
 }
 
 void ARaidPlayerController::AddResultUI()
@@ -53,9 +59,13 @@ void ARaidPlayerController::AddResultUI()
 	bShowMouseCursor = true;
 }
 
-void ARaidPlayerController::SetInputGameUIMode()
+void ARaidPlayerController::AddDeathUI()
 {
+	DeathWidget = CreateWidget<UUI_Death>(this, DeathUIClass);
+	CHECK(nullptr != DeathWidget);
+	DeathWidget->AddToViewport();
 	SetInputMode(FInputModeGameAndUI());
 	bShowMouseCursor = true;
 }
+
 

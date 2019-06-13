@@ -269,7 +269,7 @@ void AGrux::Quake()
 {
 	if (!IsAttacking)
 	{
-		Damage *= 2.0;
+		Damage *= 1.8;
 		GruxAnim->PlayQuake();
 		IsAttacking = true;
 	}
@@ -292,12 +292,12 @@ void AGrux::AIStart()
 
 void AGrux::RadialDamage()
 {
-	ServerApplyRadialDamage(Damage*2.5, 1000);
+	ServerApplyRadialDamage(Damage*2.0, 1000);
 }
 
 void AGrux::RadialDamage2()
 {
-	ServerApplyRadialDamage(Damage*3.0, 2000);
+	ServerApplyRadialDamage(Damage*2.5, 2000);
 }
 
 

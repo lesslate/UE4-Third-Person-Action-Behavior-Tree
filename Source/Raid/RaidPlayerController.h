@@ -20,18 +20,27 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = UI)
 	TSubclassOf<class UUI_Result> ResultUIClass;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = UI)
+	TSubclassOf<class UUI_Death> DeathUIClass;
+
 	UFUNCTION(BlueprintCallable, Category = "Widget")
 	void AddResultUI();
 
-	
+	UFUNCTION(BlueprintCallable, Category = "Widget")
+	void AddDeathUI();
+
 	void AddResultUITimer();
 
-	void SetInputGameUIMode();
+	void AddDeathUITimer();
+
 protected:
 	virtual void BeginPlay() override;
 
 private:
 	UPROPERTY()
 	class UUI_Result* ResultWidget;
+
+	UPROPERTY()
+	class UUI_Death* DeathWidget;
 
 };
