@@ -95,7 +95,7 @@ ARaidPlayer::ARaidPlayer()
 
 	IsAttacking = false;
 
-	MaxCombo = 4;
+	MaxCombo = 3;
 
 
 }

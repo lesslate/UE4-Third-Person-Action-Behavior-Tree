@@ -14,11 +14,4 @@ class RAID_API URaidGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
 	
-	
-public:
-	URaidGameInstance();
-	
-	void CountStart();
-protected:
-	virtual void Init() override;
 };
