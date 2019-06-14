@@ -17,6 +17,7 @@
 #include "RaidPlayerStatComponent.h"
 #include "RaidPlayerController.h"
 #include "RaidGameMode.h"
+#include "Particles/ParticleSystem.h"
 
 // Sets default values
 ARaidPlayer::ARaidPlayer()
@@ -74,6 +75,13 @@ ARaidPlayer::ARaidPlayer()
 	if (Hit_Sound.Succeeded())
 	{
 		HitSound = Hit_Sound.Object;
+	}
+
+	// 타격 파티클
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> PLAYEREFFECT(TEXT("ParticleSystem'/Game/InfinityBladeEffects/Effects/FX_Treasure/Loot/P_KeyPickup_03.P_KeyPickup_03'"));
+	if (PLAYEREFFECT.Succeeded())
+	{
+		PlayerHitEffect = PLAYEREFFECT.Object;
 	}
 
 	// 무기 소켓 생성
@@ -204,12 +212,13 @@ void ARaidPlayer::PlayerDeath()
 void ARaidPlayer::AttackCheckOverlap(UPrimitiveComponent* OverlappedComp, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
 	FVector OverlapLocation = OverlappedComp->GetComponentLocation();
+	FTransform OverlapTransform = OtherActor->GetActorTransform();
 
 	if (OtherActor != this)
 	{
 		ServerApplyDamage(OtherActor, Damage, this);
 		UGameplayStatics::PlaySoundAtLocation(this, HitSound, OverlapLocation);
-		
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), PlayerHitEffect, OverlapTransform, true);
 	}
 }
 

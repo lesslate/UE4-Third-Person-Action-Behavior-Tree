@@ -15,6 +15,8 @@
 #include "RaidGameMode.h"
 #include "Runtime/Engine/Classes/Particles/ParticleSystemComponent.h"
 #include "Runtime/Engine/Public/TimerManager.h"
+#include "Sound/SoundCue.h"
+#include "Particles/ParticleSystem.h"
 
 // Sets default values
 AGrux::AGrux()
@@ -51,6 +53,20 @@ AGrux::AGrux()
 	}
 	Particle = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Particle"));
 	Particle->SetupAttachment(GetMesh());
+
+	// 타격 사운드
+	static ConstructorHelpers::FObjectFinder<USoundCue>GRUXHITSOUND(TEXT("SoundCue'/Game/Sound/HeavyBlunt_Cue.HeavyBlunt_Cue'"));
+	if (GRUXHITSOUND.Succeeded())
+	{
+		GruxHitSound = GRUXHITSOUND.Object;
+	}
+
+	// 타격 파티클
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> GRUXHITEFFECT(TEXT("ParticleSystem'/Game/ParagonGrux/FX/Particles/Skins/Grux_Beetle_Magma/P_Grux_Magma_Melee_Impact.P_Grux_Magma_Melee_Impact'"));
+	if (GRUXHITEFFECT.Succeeded())
+	{
+		GruxHitEffect = GRUXHITEFFECT.Object;
+	}
 
 	// 오디오 컴포넌트 초기화
 	AudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("GruxAudio"));
@@ -143,11 +159,13 @@ void AGrux::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 void AGrux::AttackCheckOverlap(UPrimitiveComponent* OverlappedComp, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
 	FVector OverlapLocation = OverlappedComp->GetComponentLocation();
-	
+	FTransform OverlapTransform = OtherActor->GetActorTransform();
 	if (OtherActor != this)
 	{
-		LOG(Warning, TEXT("Damage:%d"),Damage);
+		
 		ServerApplyDamage(OtherActor, Damage, this);
+		UGameplayStatics::PlaySoundAtLocation(this, GruxHitSound, OverlapLocation);
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), GruxHitEffect, OverlapTransform, true);
 	}
 }
 

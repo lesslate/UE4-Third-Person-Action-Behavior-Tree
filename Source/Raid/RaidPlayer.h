@@ -145,6 +145,9 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Audio")
 	class USoundCue* HitSound;
 
+	UPROPERTY()
+	class UParticleSystem* PlayerHitEffect;
+
 	// Ä¸½¶ ÄÃ¸®Àü
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Mesh)
 	class UCapsuleComponent* AttackCheck;

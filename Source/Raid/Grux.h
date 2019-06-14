@@ -82,6 +82,12 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Mesh)
 	class UCapsuleComponent* GruxRightCheck;
 	
+	// Grux hit »ç¿îµå
+	UPROPERTY(BlueprintReadOnly, Category = "Audio")
+	class USoundCue* GruxHitSound;
+
+	UPROPERTY()
+	class UParticleSystem* GruxHitEffect;
 
 	UFUNCTION()
 	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
