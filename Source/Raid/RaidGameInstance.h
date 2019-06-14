@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "Raid.h"
 #include "Engine/GameInstance.h"
 #include "RaidGameInstance.generated.h"
 
@@ -14,4 +14,19 @@ class RAID_API URaidGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
 	
+public:
+	URaidGameInstance();
+
+protected:
+	virtual void Init() override;
+
+public:
+	UFUNCTION(BlueprintCallable, Category = "Widget")
+	void AddSettingUI();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = UI)
+	TSubclassOf<class UUI_Setting> SettingUIClass;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = UI)
+	class UUI_Setting* SettingWidget;
 };

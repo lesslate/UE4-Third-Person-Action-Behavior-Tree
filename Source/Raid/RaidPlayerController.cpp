@@ -4,11 +4,16 @@
 #include "ConstructorHelpers.h"
 #include "UI_Result.h"
 #include "UI_Death.h"
+#include "UI_Menu.h"
+#include "UI_HUD.h"
+#include "UI_Setting.h"
 #include "WidgetComponent.h"
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 #include "RaidGameMode.h"
 #include "Runtime/Engine/Classes/Engine/World.h"
 #include "Runtime/Engine/Public/TimerManager.h"
+#include "RaidGameInstance.h"
+
 
 ARaidPlayerController::ARaidPlayerController()
 {
@@ -23,11 +28,27 @@ ARaidPlayerController::ARaidPlayerController()
 	{
 		DeathUIClass = UI_DEATH.Class;
 	}
+
+	static ConstructorHelpers::FClassFinder<UUI_Menu> UI_MENU(TEXT("WidgetBlueprint'/Game/UI/BP_Menu.BP_Menu_C'"));
+	if (UI_MENU.Succeeded())
+	{
+		MenuUIClass = UI_MENU.Class;
+	}
+
+	static ConstructorHelpers::FClassFinder<UUI_HUD> UI_HUD(TEXT("WidgetBlueprint'/Game/UI/BP_HUDWidget.BP_HUDWidget_C'"));
+	if (UI_HUD.Succeeded())
+	{
+		HUDUIClass = UI_HUD.Class;
+	}
 }
 
 void ARaidPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
+
+	AddHUDUI();
+	AddMenuUI();
+	//AddSettingUI();
 
 	ARaidGameMode* GameMode = Cast<ARaidGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 	if (GameMode != nullptr)
@@ -35,6 +56,7 @@ void ARaidPlayerController::BeginPlay()
 		GameMode->EndGame.AddUObject(this, &ARaidPlayerController::AddResultUITimer);
 		GameMode->PlayerDead.AddUObject(this, &ARaidPlayerController::AddDeathUITimer);
 	}
+
 
 }
 
@@ -69,3 +91,27 @@ void ARaidPlayerController::AddDeathUI()
 }
 
 
+void ARaidPlayerController::AddMenuUI()
+{
+	MenuWidget = CreateWidget<UUI_Menu>(this, MenuUIClass);
+	CHECK(nullptr != MenuWidget);
+	MenuWidget->AddToViewport();
+	MenuWidget->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void ARaidPlayerController::AddHUDUI()
+{
+	HUDWidget = CreateWidget<UUI_HUD>(this, HUDUIClass);
+	CHECK(nullptr != HUDWidget);
+	HUDWidget->AddToViewport();
+	HUDWidget->SetVisibility(ESlateVisibility::Hidden);
+}
+
+//void ARaidPlayerController::AddSettingUI()
+//{
+//	//auto GameInstance = Cast<URaidGameInstance>(GetGameInstance());
+//	//SettingUI = GameInstance->SettingWidget;
+//	//SettingUI->AddToViewport();
+//	//SettingUI->SetVisibility(ESlateVisibility::Hidden);
+//}
+//
