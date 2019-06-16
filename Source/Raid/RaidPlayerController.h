@@ -45,8 +45,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Widget")
 	void AddHUDUI();
 
-	//UFUNCTION(BlueprintCallable, Category = "Widget")
-	//void AddSettingUI();
+	UFUNCTION(BlueprintCallable, Category = "Widget")
+	void AddSettingUI();
 
 	void AddResultUITimer();
 	void AddDeathUITimer();

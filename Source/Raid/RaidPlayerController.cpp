@@ -48,7 +48,7 @@ void ARaidPlayerController::BeginPlay()
 
 	AddHUDUI();
 	AddMenuUI();
-	//AddSettingUI();
+	AddSettingUI();
 
 	ARaidGameMode* GameMode = Cast<ARaidGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 	if (GameMode != nullptr)
@@ -107,11 +107,10 @@ void ARaidPlayerController::AddHUDUI()
 	HUDWidget->SetVisibility(ESlateVisibility::Hidden);
 }
 
-//void ARaidPlayerController::AddSettingUI()
-//{
-//	//auto GameInstance = Cast<URaidGameInstance>(GetGameInstance());
-//	//SettingUI = GameInstance->SettingWidget;
-//	//SettingUI->AddToViewport();
-//	//SettingUI->SetVisibility(ESlateVisibility::Hidden);
-//}
-//
+void ARaidPlayerController::AddSettingUI()
+{
+	auto GameInstance = Cast<URaidGameInstance>(GetGameInstance());
+	GameInstance->SettingWidget->AddToViewport();
+	GameInstance->SettingWidget->SetVisibility(ESlateVisibility::Hidden);
+}
+
