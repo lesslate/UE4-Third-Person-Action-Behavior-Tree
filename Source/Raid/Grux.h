@@ -86,8 +86,14 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Audio")
 	class USoundCue* GruxHitSound;
 
+	UPROPERTY(BlueprintReadOnly, Category = "Audio")
+	class USoundCue* GruxGroundHit;
+
 	UPROPERTY()
 	class UParticleSystem* GruxHitEffect;
+
+	UPROPERTY()
+	class UParticleSystem* GruxFireEffect;
 
 	UFUNCTION()
 	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);

@@ -21,6 +21,9 @@ public:
 	void StopJumping();
 	void PlayerDeath();
 
+	UPROPERTY()
+	bool IsDodge;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	class ARaidGameMode* GameMode;
 
@@ -145,6 +148,10 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Audio")
 	class USoundCue* HitSound;
 
+	UPROPERTY(BlueprintReadOnly, Category = "Audio")
+	class USoundCue* HitSound2;
+
+
 	UPROPERTY()
 	class UParticleSystem* PlayerHitEffect;
 
@@ -195,8 +202,6 @@ private:
 	bool IsRun;
 
 	
-	UPROPERTY()
-	bool IsDodge;
 
 	UFUNCTION()
 	void AttackCheckOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);

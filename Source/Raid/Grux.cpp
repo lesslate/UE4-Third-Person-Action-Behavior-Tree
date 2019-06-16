@@ -17,6 +17,7 @@
 #include "Runtime/Engine/Public/TimerManager.h"
 #include "Sound/SoundCue.h"
 #include "Particles/ParticleSystem.h"
+#include "RaidPlayer.h"
 
 // Sets default values
 AGrux::AGrux()
@@ -60,7 +61,12 @@ AGrux::AGrux()
 	{
 		GruxHitSound = GRUXHITSOUND.Object;
 	}
-
+	static ConstructorHelpers::FObjectFinder<USoundCue>GRUXGROUND(TEXT("SoundCue'/Game/Sound/GroundHit_Cue.GroundHit_Cue'"));
+	if (GRUXGROUND.Succeeded())
+	{
+		GruxGroundHit = GRUXGROUND.Object;
+	}
+	
 	// 타격 파티클
 	static ConstructorHelpers::FObjectFinder<UParticleSystem> GRUXHITEFFECT(TEXT("ParticleSystem'/Game/ParagonGrux/FX/Particles/Skins/Grux_Beetle_Magma/P_Grux_Magma_Melee_Impact.P_Grux_Magma_Melee_Impact'"));
 	if (GRUXHITEFFECT.Succeeded())
@@ -68,6 +74,12 @@ AGrux::AGrux()
 		GruxHitEffect = GRUXHITEFFECT.Object;
 	}
 
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> GRUXFIRE(TEXT("ParticleSystem'/Game/ParagonGrux/FX/Particles/Abilities/Primary/FX/P_Grux_Melee_ShockwaveImpact.P_Grux_Melee_ShockwaveImpact'"));
+	if (GRUXFIRE.Succeeded())
+	{
+		GruxFireEffect = GRUXFIRE.Object;
+	}
+	
 	// 오디오 컴포넌트 초기화
 	AudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("GruxAudio"));
 	AudioComponent->bAutoActivate = false;
@@ -114,9 +126,35 @@ bool AGrux::ServerApplyDamage_Validate(AActor * DamagedActor, float Damamge, AAc
 
 void AGrux::ServerApplyRadialDamage_Implementation(float RDamage,float Radius)
 {
-	UGameplayStatics::ApplyRadialDamage(GetWorld(), RDamage, this->GetActorLocation(), Radius, nullptr, TArray<AActor*>(), this, false, ECC_Visibility);
+	UGameplayStatics::ApplyRadialDamage(GetWorld(), RDamage, this->GetActorLocation(), Radius, nullptr, TArray<AActor*>(), this, false, ECC_GameTraceChannel5);
 	GruxLeftCheck->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GruxRightCheck->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	FVector Center = this->GetActorLocation();
+	UWorld* World = GetWorld();
+
+	TArray<FOverlapResult> OverlapResults;
+	FCollisionQueryParams CollisionQueryParam(NAME_None, false, this);
+	bool bResult = World->OverlapMultiByChannel(
+		OverlapResults,
+		Center,
+		FQuat::Identity,
+		ECollisionChannel::ECC_GameTraceChannel5,
+		FCollisionShape::MakeSphere(Radius),
+		CollisionQueryParam
+	);
+	if (bResult)
+	{
+		for (auto OverlapResult : OverlapResults)
+		{
+			ARaidPlayer* Player = Cast<ARaidPlayer>(OverlapResult.GetActor());
+
+			FVector PlayerLocation=Player->GetActorLocation();
+			FTransform PlayerTransform = Player->GetActorTransform();
+			UGameplayStatics::PlaySoundAtLocation(this, GruxGroundHit, PlayerLocation);
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), GruxFireEffect, PlayerTransform, true);
+		}
+	}
 }
 
 
@@ -162,10 +200,15 @@ void AGrux::AttackCheckOverlap(UPrimitiveComponent* OverlappedComp, AActor * Oth
 	FTransform OverlapTransform = OtherActor->GetActorTransform();
 	if (OtherActor != this)
 	{
-		
+		auto Player = Cast<ARaidPlayer>(OtherActor);
+		bool PlayerDodge = Player->IsDodge;
 		ServerApplyDamage(OtherActor, Damage, this);
-		UGameplayStatics::PlaySoundAtLocation(this, GruxHitSound, OverlapLocation);
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), GruxHitEffect, OverlapTransform, true);
+
+		if (!PlayerDodge)
+		{
+			UGameplayStatics::PlaySoundAtLocation(this, GruxHitSound, OverlapLocation);
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), GruxHitEffect, OverlapTransform, true);
+		}
 	}
 }
 

@@ -77,6 +77,12 @@ ARaidPlayer::ARaidPlayer()
 		HitSound = Hit_Sound.Object;
 	}
 
+	static ConstructorHelpers::FObjectFinder<USoundCue>Hit_Sound2(TEXT("SoundCue'/Game/Sound/CriticalHit_Cue.CriticalHit_Cue'"));
+	if (Hit_Sound2.Succeeded())
+	{
+		HitSound2 = Hit_Sound2.Object;
+	}
+
 	// 타격 파티클
 	static ConstructorHelpers::FObjectFinder<UParticleSystem> PLAYEREFFECT(TEXT("ParticleSystem'/Game/InfinityBladeEffects/Effects/FX_Treasure/Loot/P_KeyPickup_03.P_KeyPickup_03'"));
 	if (PLAYEREFFECT.Succeeded())
@@ -218,6 +224,7 @@ void ARaidPlayer::AttackCheckOverlap(UPrimitiveComponent* OverlappedComp, AActor
 	{
 		ServerApplyDamage(OtherActor, Damage, this);
 		UGameplayStatics::PlaySoundAtLocation(this, HitSound, OverlapLocation);
+		UGameplayStatics::PlaySoundAtLocation(this, HitSound2, OverlapLocation);
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), PlayerHitEffect, OverlapTransform, true);
 	}
 }
