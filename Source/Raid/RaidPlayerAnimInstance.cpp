@@ -46,6 +46,12 @@ URaidPlayerAnimInstance::URaidPlayerAnimInstance()
 	{
 		HitMontage = HIT.Object;
 	}
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> SKILL(TEXT("AnimMontage'/Game/TwinbladesAnimsetBase/RootMotion/Twinblades_SPAttack1_Montage.Twinblades_SPAttack1_Montage'"));
+	if (SKILL.Succeeded())
+	{
+		SkillMontage = SKILL.Object;
+	}
 }
 
 void URaidPlayerAnimInstance::NativeBeginPlay()
@@ -82,6 +88,11 @@ void URaidPlayerAnimInstance::PlayDead()
 void URaidPlayerAnimInstance::PlayHitMontage()
 {
 	Montage_Play(HitMontage, 1.0f);
+}
+
+void URaidPlayerAnimInstance::PlaySkill()
+{
+	Montage_Play(SkillMontage, 1.0f);
 }
 
 void URaidPlayerAnimInstance::PlayDashAttack()

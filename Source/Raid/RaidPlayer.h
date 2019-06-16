@@ -21,8 +21,15 @@ public:
 	void StopJumping();
 	void PlayerDeath();
 
+	void SkillTimer();
+
+	UPROPERTY()
+	bool IsSkill;
+
 	UPROPERTY()
 	bool IsDodge;
+
+	
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	class ARaidGameMode* GameMode;
@@ -68,7 +75,19 @@ public:
 	UFUNCTION(Reliable, NetMulticast)
 	void AttackMulticast2();
 	void AttackMulticast2_Implementation();
-	
+
+	////////////   Skill  //////////////////////
+
+	UFUNCTION(Reliable, Server, WithValidation)
+	void SkillServer();
+	void SkillServer_Implementation();
+	bool SkillServer_Validate();
+
+	UFUNCTION(Reliable, NetMulticast)
+	void SkillMulticast();
+	void SkillMulticast_Implementation();
+
+
 	///////////    Combo  ///////////////////////////
 
 	UFUNCTION(Reliable, Server, WithValidation)
@@ -201,7 +220,8 @@ private:
 	UPROPERTY()
 	bool IsRun;
 
-	
+	UPROPERTY()
+	FTimerHandle timer;
 
 	UFUNCTION()
 	void AttackCheckOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);

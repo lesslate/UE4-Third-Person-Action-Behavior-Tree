@@ -151,8 +151,11 @@ void AGrux::ServerApplyRadialDamage_Implementation(float RDamage,float Radius)
 
 			FVector PlayerLocation=Player->GetActorLocation();
 			FTransform PlayerTransform = Player->GetActorTransform();
-			UGameplayStatics::PlaySoundAtLocation(this, GruxGroundHit, PlayerLocation);
-			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), GruxFireEffect, PlayerTransform, true);
+			if (!Player->IsDodge)
+			{
+				UGameplayStatics::PlaySoundAtLocation(this, GruxGroundHit, PlayerLocation);
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), GruxFireEffect, PlayerTransform, true);
+			}
 		}
 	}
 }

@@ -33,7 +33,7 @@ public:
 	void JumpToAttackMontageSection(int32 NewSection);
 	void PlayDead();
 	void PlayHitMontage();
-
+	void PlaySkill();
 
 public:
 	FOnNextAttackCheckDelegate OnNextAttackCheck;
@@ -77,6 +77,9 @@ private:
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
 	UAnimMontage* DashAttack;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
+	UAnimMontage* SkillMontage;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
 	UAnimMontage* Dodge;

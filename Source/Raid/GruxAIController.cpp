@@ -30,7 +30,7 @@ AGruxAIController::AGruxAIController()
 	{
 		BTGrux = BTObject.Object;
 	}
-	Radius = 1500;
+	Radius = 4500;
 }
 
 void AGruxAIController::Possess(APawn * InPawn)

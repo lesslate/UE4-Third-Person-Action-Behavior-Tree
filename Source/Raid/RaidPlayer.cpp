@@ -18,6 +18,7 @@
 #include "RaidPlayerController.h"
 #include "RaidGameMode.h"
 #include "Particles/ParticleSystem.h"
+#include "Runtime/Engine/Public/TimerManager.h"
 
 // Sets default values
 ARaidPlayer::ARaidPlayer()
@@ -110,7 +111,7 @@ ARaidPlayer::ARaidPlayer()
 	IsAttacking = false;
 
 	MaxCombo = 3;
-
+	IsSkill = false;
 
 }
 
@@ -187,6 +188,7 @@ void ARaidPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 	PlayerInputComponent->BindAction("Dodge", IE_Released, this, &ARaidPlayer::DodgeServer);
 
+	PlayerInputComponent->BindAction("Skill1", IE_Released, this, &ARaidPlayer::SkillServer);
 }
 
 void ARaidPlayer::Jump()
@@ -212,6 +214,11 @@ void ARaidPlayer::PlayerDeath()
 	
 
 	
+}
+
+void ARaidPlayer::SkillTimer()
+{
+	IsSkill = false;
 }
 
 
@@ -363,6 +370,36 @@ void ARaidPlayer::AttackMulticast2_Implementation()
 	IsDodge = true;
 }
 
+//////////// Skill1 ////////////////////////////////////////
+
+void ARaidPlayer::SkillServer_Implementation()
+{
+	SkillMulticast();
+}
+
+bool ARaidPlayer::SkillServer_Validate()
+{
+	return true;
+}
+
+void ARaidPlayer::SkillMulticast_Implementation()
+{
+	IsInAir = GetCharacterMovement()->IsFalling();
+	if (IsInAir || IsDeath || IsHit) return;
+
+	if (!IsAttacking && !IsDodge&&!IsSkill)
+	{
+	
+		Damage *= 4.8;
+		PlayerAnim->PlaySkill();
+		IsSkill = true;
+		IsAttacking = true;
+		IsDodge = true;
+		GetWorld()->GetTimerManager().SetTimer(timer, this, &ARaidPlayer::SkillTimer, 11.0f, false);
+	}
+
+	
+}
 
 /////////////Combo///////////////////////////////////////////
 
