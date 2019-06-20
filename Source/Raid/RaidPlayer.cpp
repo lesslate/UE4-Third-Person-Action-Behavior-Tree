@@ -177,8 +177,8 @@ void ARaidPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAxis("MoveForward", this, &ARaidPlayer::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ARaidPlayer::MoveRight);
 
-	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
-	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
+	/*PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
+	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);*/
 
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &ARaidPlayer::StartSprintServer);
 	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &ARaidPlayer::StopSprintServer);
@@ -211,9 +211,7 @@ void ARaidPlayer::PlayerDeath()
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	PlayerAnim->PlayDead();
-	
 
-	
 }
 
 void ARaidPlayer::SkillTimer()

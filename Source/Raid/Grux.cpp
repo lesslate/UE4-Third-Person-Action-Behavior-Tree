@@ -148,13 +148,16 @@ void AGrux::ServerApplyRadialDamage_Implementation(float RDamage,float Radius)
 		for (auto OverlapResult : OverlapResults)
 		{
 			ARaidPlayer* Player = Cast<ARaidPlayer>(OverlapResult.GetActor());
-
-			FVector PlayerLocation=Player->GetActorLocation();
-			FTransform PlayerTransform = Player->GetActorTransform();
-			if (!Player->IsDodge)
+			if (Player != nullptr)
 			{
-				UGameplayStatics::PlaySoundAtLocation(this, GruxGroundHit, PlayerLocation);
-				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), GruxFireEffect, PlayerTransform, true);
+				CHECK(Player != nullptr);
+				FVector PlayerLocation = Player->GetActorLocation();
+				FTransform PlayerTransform = Player->GetActorTransform();
+				if (!Player->IsDodge)
+				{
+					UGameplayStatics::PlaySoundAtLocation(this, GruxGroundHit, PlayerLocation);
+					UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), GruxFireEffect, PlayerTransform, true);
+				}
 			}
 		}
 	}
@@ -204,10 +207,10 @@ void AGrux::AttackCheckOverlap(UPrimitiveComponent* OverlappedComp, AActor * Oth
 	if (OtherActor != this)
 	{
 		auto Player = Cast<ARaidPlayer>(OtherActor);
-		bool PlayerDodge = Player->IsDodge;
+		CHECK(Player!=nullptr);
 		ServerApplyDamage(OtherActor, Damage, this);
 
-		if (!PlayerDodge)
+		if (!Player->IsDodge)
 		{
 			UGameplayStatics::PlaySoundAtLocation(this, GruxHitSound, OverlapLocation);
 			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), GruxHitEffect, OverlapTransform, true);

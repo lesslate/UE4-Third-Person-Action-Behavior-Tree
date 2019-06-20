@@ -180,7 +180,7 @@ void UGruxAnimInstance::AnimNotify_RadialDamage()
 
 void UGruxAnimInstance::AnimNotify_RadialDamage2()
 {
-	Grux->RadialDamage();
+	Grux->RadialDamage2();
 }
 
 void UGruxAnimInstance::PlayStartMontage()
