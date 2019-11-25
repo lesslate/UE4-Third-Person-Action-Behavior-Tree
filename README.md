@@ -10,6 +10,9 @@
 
 https://drive.google.com/file/d/1HcpNnioHy_pP-sFhzAJn9HVU6Mo0Jc7s/view?usp=sharing
 
+> 플레이 영상
+
+https://youtu.be/3UrmHi87_c0
 
 > 조작키
 
